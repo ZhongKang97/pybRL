@@ -30,9 +30,9 @@ env = GymEnv(ENV_ID)
 mean_dist = 1.8115
 
 # policy = linear_policy.LinearPolicy(env.spec)
-policy = RBF_linear.RBFLinearPolicy(env.spec, RBF_number=100, avg_pairwise_distance= mean_dist )
+policy = RBF_linear.RBFLinearPolicy(env.spec, RBF_number=500, avg_pairwise_distance= mean_dist )
 # baseline = linear_baseline.LinearBaseline(env.spec)
-baseline = MLPBaseline.MLPBaseline(env.spec, reg_coef=1e-3, batch_size=128, epochs=5, learn_rate=1e-3)
+baseline = MLPBaseline.MLPBaseline(env.spec, reg_coef=1e-3, batch_size=64, epochs=5, learn_rate=1e-3)
 # agent = batch_reinforce.BatchREINFORCE(env, policy, baseline, learn_rate=5e-3, seed = None, save_logs=True)
 agent = npg.NPG(env, policy, baseline, normalized_step_size=1e-2, seed=None, hvp_sample_frac=1.0, save_logs=True, kl_dist=None)
 # agent = ppo.PPO(env, policy, baseline, clip_coef=0.2, epochs=10, mb_size=64, learn_rate=3e-4, save_logs=True)

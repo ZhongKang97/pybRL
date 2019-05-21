@@ -8,14 +8,15 @@ from pybRL.utils.gym_env import EnvSpec
 import pybRL.policies.gaussian_linear as gaussian_linear
 import pybullet_envs
 import pybullet_envs.bullet.minitaur_gym_env as e
+import pybullet_envs.minitaur.envs.minitaur_trotting_env as e
 import pybullet as p
 import numpy as np
 # p.connect(p.GUI)
 envs_spec = EnvSpec(28, 8,0,1)
-env_id = "MinitaurBulletEnv-v0"
+env_id = "MinitaurTrottingEnv-v0"
 # env = GymEnv(env_id)
-env = e.MinitaurBulletEnv(render=True)
-path = '/home/sashank/mjrl-master/pybRL/experiments/Minitaur_exp1/iterations/best_policy.pickle'
+env = e.MinitaurTrottingEnv(render=True)
+path = '/home/sashank/mjrl-master/pybRL/experiments/MinitaurTrot_exp1/iterations/best_policy.pickle'
 with open(path, 'rb') as f:
     policy = pickle.load(f)
 state = env.reset()
