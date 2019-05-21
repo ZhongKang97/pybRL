@@ -56,9 +56,9 @@ def train_agent(job_name, agent,
     best_policy = copy.deepcopy(agent.policy)
     best_perf = -1e8
     train_curve = best_perf*np.ones(niter)
-    mean_pol_perf = 0.0
     e = GymEnv(agent.env.env_id)
-
+    running_return = 0
+    mean_pol_perf = 0
     for i in range(niter):
         print("......................................................................................")
         print("ITERATION : %i " % i)
@@ -69,6 +69,9 @@ def train_agent(job_name, agent,
         args = dict(N=N, sample_mode=sample_mode, gamma=gamma, gae_lambda=gae_lambda, num_cpu=num_cpu)
         stats = agent.train_step(**args)
         train_curve[i] = stats[0] #mean return is in train_curve
+        if(i == 0):
+            running_return = train_curve[i]
+        running_return = 0.9*running_return + 0.1*train_curve[i]
         if evaluation_rollouts is not None and evaluation_rollouts > 0:
             print("Performing evaluation rollouts ........")
             eval_paths = sample_paths_parallel(N=evaluation_rollouts, policy=agent.policy, num_cpu=num_cpu,
@@ -88,10 +91,10 @@ def train_agent(job_name, agent,
         # print results to console
         if i == 0:
             result_file = open('results.txt', 'w')
-            print("Iter | Current Return | Mean Return | Best Return \n")
+            print("Iter (all means) | Current Return | Mean Return | Best Return \n")
             result_file.write("Iter | Sampling Pol | Evaluation Pol | Best (Sampled) \n")
             result_file.close()
-        print(f"Current Return :{round(train_curve[i],2)} | Mean Return :{round(mean_pol_perf,2)} | Best Return : {round(best_perf,2)}  ")
+        print(f"Current Return :{round(train_curve[i],2)} | Mean Return :{round(running_return,2)} | Best Return : {round(best_perf,2)}  ")
         result_file = open('results.txt', 'a')
         result_file.write("%4i %5.2f %5.2f %5.2f \n" % (i, train_curve[i], mean_pol_perf, best_perf))
         result_file.close()

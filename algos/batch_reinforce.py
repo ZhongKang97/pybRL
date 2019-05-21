@@ -12,7 +12,7 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 import copy
-
+import pdb
 # samplers
 import pybRL.samplers.trajectory_sampler as trajectory_sampler
 import pybRL.samplers.batch_sampler as batch_sampler
@@ -71,6 +71,8 @@ class BatchREINFORCE:
         :return : A flat list containing gradients of the weights (as calculated by PyTorch)
         """
         loss = self.compute_reinforce_loss(observations, actions, advantages)
+        if(np.isinf(loss.data.numpy())):
+            pdb.set_trace()
         vpg_grad = torch.autograd.grad(loss, self.policy.trainable_params)
         vpg_grad = np.concatenate([g.contiguous().view(-1).data.numpy() for g in vpg_grad])
         return vpg_grad

@@ -8,6 +8,8 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 from pybRL.utils.gym_env import GymEnv
 from pybRL.samplers import base_sampler
+# import traceback
+import pdb
 class RBFLinearPolicy:
     def __init__(self, env_spec,
                  min_log_std=-3,
@@ -133,6 +135,8 @@ class RBFLinearPolicy:
         obs_var = Variable(torch.from_numpy(observations).float(), requires_grad=False)
         act_var = Variable(torch.from_numpy(actions).float(), requires_grad=False)
         mean = model(obs_var)
+        if(np.any(np.isnan(mean.data.numpy()))):
+            pdb.set_trace()
         # print(mean)
         # print(obs_var)
         # print(act_var)
@@ -248,6 +252,19 @@ class RBFLinearModel(nn.Module):
         out = torch.sin(out)
         out = self.fc0(out)
         out = out * self.out_scale + self.out_shift
+        if(np.any(np.isnan(out.data.numpy()))):
+            # print('forward gave out')
+            # out = (x - self.in_shift)/(self.in_scale + 1e-8)
+            # out = self.feature_layer(out)
+            # out = torch.sin(out)
+            # out = self.fc0(out)
+            # print('step 4: ', out)
+            # print('weights: ', self.fc0.weight.data)
+            # out = out * self.out_scale + self.out_shift
+            # for line in traceback.format_stack():
+            #     print(line.strip())
+            # pdb.set_trace()
+            pass
         return out
     
     def init_weights(self, layer):
@@ -256,7 +273,7 @@ class RBFLinearModel(nn.Module):
             nn.init.uniform_(layer.bias.data, a= -3.14, b = 3.14)
 
 if(__name__ == "__main__"):
-    # test_linear_model = RBFLinearModel(4,2,5)
+    test_linear_model = RBFLinearModel(4,2,500)
     # y = test_linear_model(torch.tensor([1.,1.,1.,1.]))
     # print('feature_layer_params: ')
     # print(list(test_linear_model.feature_layer.parameters()))
@@ -267,7 +284,10 @@ if(__name__ == "__main__"):
     # print(list(test_linear_model.parameters()))
     # print('output: ')
     # print(y)
-
+    obs = np.array([[1.7989549e-04, 9.8173601e-05, 9.3176223e-02, 5.7510655e-02]])
+    obs = np.float32(obs.reshape(1, -1))
+    obs = torch.from_numpy(obs)
+    print(test_linear_model(obs))
     # env_name = 'CartPole-v0'
     # env = GymEnv(env_name)
     # rbf_lin_pol = RBFLinearPolicy(env.spec, RBF_number=5)

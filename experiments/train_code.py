@@ -19,6 +19,7 @@ import pybRL.utils.process_samples as process_samples
 
 import pybullet_envs
 import pybulletgym
+
 SEED = 500
 ENV_ID = 'MinitaurTrottingEnv-v0'
 lr = 1e-2
@@ -34,7 +35,7 @@ policy = RBF_linear.RBFLinearPolicy(env.spec, RBF_number=500, avg_pairwise_dista
 # baseline = linear_baseline.LinearBaseline(env.spec)
 baseline = MLPBaseline.MLPBaseline(env.spec, reg_coef=1e-3, batch_size=64, epochs=5, learn_rate=1e-3)
 # agent = batch_reinforce.BatchREINFORCE(env, policy, baseline, learn_rate=5e-3, seed = None, save_logs=True)
-agent = npg.NPG(env, policy, baseline, normalized_step_size=1e-2, seed=None, hvp_sample_frac=1.0, save_logs=True, kl_dist=None)
+agent = npg.NPG(env, policy, baseline, normalized_step_size=1e-1, seed=None, hvp_sample_frac=1.0, save_logs=True, kl_dist=None, FIM_invert_args={'iters': 50, 'damping': 1e-4},)
 # agent = ppo.PPO(env, policy, baseline, clip_coef=0.2, epochs=10, mb_size=64, learn_rate=3e-4, save_logs=True)
 args = dict(
                 job_name = 'MinitaurTrot_exp1',
@@ -45,7 +46,7 @@ args = dict(
                 gae_lambda = 1,
                 num_cpu = 1,
                 sample_mode = 'trajectories',
-                num_traj = 10,
+                num_traj = 1,
                 # num_samples = 50000, # has precedence, used with sample_mode = 'samples'
                 save_freq = 5,
                 evaluation_rollouts = None,
@@ -53,5 +54,5 @@ args = dict(
  )
 train_agent.train_agent(**args)
 
-paths = trajectory_sampler.sample_paths_parallel(10, policy, env_name = ENV_ID)
-print(paths)
+# paths = trajectory_sampler.sample_paths_parallel(10, policy, env_name = ENV_ID)
+# print(paths)
