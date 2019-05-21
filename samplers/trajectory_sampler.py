@@ -11,6 +11,14 @@ import time as timer
 import mjrl.samplers.base_sampler as base_sampler
 import mjrl.samplers.evaluation_sampler as eval_sampler
 from mjrl.samplers.base_sampler import RandomPolicy
+
+#Testing speed for pybullet envs##########
+import mjrl.policies.gaussian_linear as gaussian_linear
+from mjrl.utils.gym_env import GymEnv
+import pybullet_envs
+import time
+import gym
+##########################################
 def sample_paths(N, policy, T=1e2, env=None, env_name=None, pegasus_seed=None, mode='sample'):
     """ 
     Function to sample path
@@ -122,5 +130,17 @@ if(__name__ == "__main__"):
     # print('Trying normal run :')
     # y = sample_paths(N, pol, T, env, env_name)
     # print(y)
+
+    N = 10
+    T = 1e6
+    env_name = "MinitaurTrottingEnv-v0"
+    # env = gym.make(env_name)
+    env = GymEnv(env_name)
+    pol = gaussian_linear.LinearPolicy(env.spec)
+    env = gym.make(env_name)
+    start_time = time.time()
+    print('started')
+    y = sample_paths(N, pol, T, env)
+    print("time_taken: ", time.time() - start_time)
 
     pass

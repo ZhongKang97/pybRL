@@ -7,6 +7,9 @@ import numpy as np
 from mjrl.utils.get_environment import get_environment
 from mjrl.utils import tensor_utils
 
+#imports for checking optimization
+# import time
+
 # Single core rollout to sample trajectories
 # =======================================================
 class RandomPolicy:
@@ -44,24 +47,26 @@ def do_rollout(N,
             env.env._seed(pegasus_seed)
         except AttributeError as e:
             env.env.seed(pegasus_seed)
-    T = min(T, env.horizon) 
+    #Gonna change only for pybullet
+    # T = min(T, env.horizon) 
+    T=T
 
-    # print("####### Worker started #######")
+    print("####### Worker started #######")
     
     paths = []
 
     for ep in range(N):
-
+        start_time = time.time()
         # Set pegasus seed if asked
-        if pegasus_seed is not None:
-            seed = pegasus_seed + ep
-            try:
-                env.env._seed(seed)
-            except AttributeError as e:
-                env.env.seed(seed)
-            np.random.seed(seed)
-        else:
-            np.random.seed()
+        # if pegasus_seed is not None:
+        #     seed = pegasus_seed + ep
+        #     try:
+        #         env.env._seed(seed)
+        #     except AttributeError as e:
+        #         env.env.seed(seed)
+        #     np.random.seed(seed)
+        # else:
+        #     np.random.seed()
         
         observations=[]
         actions=[]
@@ -72,9 +77,11 @@ def do_rollout(N,
         o = env.reset()
         done = False
         t = 0
-
         while t < T and done != True:
+            start_time = time.time()
             a, agent_info = policy.get_action(o)
+            print('time to get action: ', time.time() - start_time)
+            start_time = time.time()
             next_o, r, done, env_info = env.step(a)
             #observations.append(o.ravel())
             observations.append(o)
@@ -82,9 +89,9 @@ def do_rollout(N,
             rewards.append(r)
             agent_infos.append(agent_info)
             env_infos.append(env_info)
+            print('time to play action: ', time.time() - start_time)
             o = next_o
             t += 1
-
         path = dict(
             observations=np.array(observations),
             actions=np.array(actions),
@@ -96,7 +103,7 @@ def do_rollout(N,
 
         paths.append(path)
 
-    # print("====== Worker finished ======")
+    print("====== Worker finished ======")
     del(env)
     return paths
 
