@@ -8,7 +8,7 @@ from mjrl.utils.get_environment import get_environment
 from mjrl.utils import tensor_utils
 
 #imports for checking optimization
-# import time
+import time
 
 # Single core rollout to sample trajectories
 # =======================================================

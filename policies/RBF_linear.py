@@ -8,10 +8,11 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 from mjrl.utils.gym_env import GymEnv
 from mjrl.samplers import base_sampler
-class LinearPolicy:
+class RBFLinearPolicy:
     def __init__(self, env_spec,
                  min_log_std=-3,
                  init_log_std=0,
+                 RBF_number = 100,
                  seed=None):
         """
         :param env_spec: specifications of the env (see utils/gym_env.py)
@@ -22,7 +23,7 @@ class LinearPolicy:
         self.n = env_spec.observation_dim  # number of states
         self.m = env_spec.action_dim  # number of actions
         self.min_log_std = min_log_std
-
+        self.feature_count = RBF_number
         # Set seed
         # ------------------------
         if seed is not None:
@@ -31,18 +32,18 @@ class LinearPolicy:
 
         # Policy network
         # ------------------------
-        self.model = LinearModel(self.n, self.m)
+        self.model = RBFLinearModel(self.n, self.m, self.feature_count)
         # make weights small -- not sure why but he wants to make the last weights very small (for linear and MLP alike)
-        for param in list(self.model.parameters())[-2:]:  # only last layer
-           param.data = 1e-2 * param.data
+        # for param in list(self.model.parameters())[-2:]:  # only last layer
+        #    param.data = 1e-2 * param.data
         self.log_std = Variable(torch.ones(self.m) * init_log_std, requires_grad=True)
-        self.trainable_params = list(self.model.parameters()) + [self.log_std]
+        self.trainable_params = list(filter(lambda x: x.requires_grad == True,self.model.parameters())) + [self.log_std]
 
         # Old Policy network
         # ------------------------
-        self.old_model = LinearModel(self.n, self.m)
+        self.old_model = RBFLinearModel(self.n, self.m, self.feature_count)
         self.old_log_std = Variable(torch.ones(self.m) * init_log_std)
-        self.old_params = list(self.old_model.parameters()) + [self.old_log_std]
+        self.old_params = list(filter(lambda x: x.requires_grad == True,self.old_model.parameters())) + [self.old_log_std]
         for idx, param in enumerate(self.old_params):
             param.data = self.trainable_params[idx].data.clone()
 
@@ -196,7 +197,7 @@ class LinearPolicy:
         return torch.mean(sample_kl)
 
 
-class LinearModel(nn.Module):
+class RBFLinearModel(nn.Module):
     """
     Automatically creates a 1 layer dense neural network, given input and output dimensions. (Ignore scaling for now)
     :param obs_dim : Input dimension
@@ -205,18 +206,23 @@ class LinearModel(nn.Module):
     Input to forward has to be a torch float tensor
     """
     def __init__(self, obs_dim, act_dim,
-                #  a = 100,
+                 RBF_features,
+                 avg_pairwise_distance = 1,
                  in_shift = None,
                  in_scale = None,
                  out_shift = None,
                  out_scale = None):
-        super(LinearModel, self).__init__()
+        super(RBFLinearModel, self).__init__()
 
         self.obs_dim = obs_dim
         self.act_dim = act_dim
         self.set_transformations(in_shift, in_scale, out_shift, out_scale)
-        # self.feature_layer = nn.Linear(obs_dim,a)
-        self.fc0   = nn.Linear(obs_dim, act_dim)
+        self.feature_layer = nn.Linear(obs_dim,RBF_features)
+        self.avg_pairwise_distance = avg_pairwise_distance
+        for param in self.feature_layer.parameters():
+            param.requires_grad = False
+        self.feature_layer.apply(self.init_weights)
+        self.fc0   = nn.Linear(RBF_features, act_dim)
 
     def set_transformations(self, in_shift=None, in_scale=None, out_shift=None, out_scale=None):
         # store native scales that can be used for resets
@@ -236,45 +242,58 @@ class LinearModel(nn.Module):
 
     def forward(self, x):
         out = (x - self.in_shift)/(self.in_scale + 1e-8)
+        out = self.feature_layer(out)
+        out = torch.sin(out)
         out = self.fc0(out)
         out = out * self.out_scale + self.out_shift
         return out
     
+    def init_weights(self, layer):
+        if(type(layer) == nn.Linear):
+            nn.init.normal_(layer.weight.data, mean = 0, std = 1./self.avg_pairwise_distance)
+            nn.init.uniform_(layer.bias.data, a= -3.14, b = 3.14)
 
 if(__name__ == "__main__"):
-    test_linear_model = LinearModel(4,2)
-    y = test_linear_model(torch.tensor([1.,1.,1.,1.]))
-    print(list(test_linear_model.parameters())[-2])
-    print(y)
+    # test_linear_model = RBFLinearModel(4,2,5)
+    # y = test_linear_model(torch.tensor([1.,1.,1.,1.]))
+    # print('feature_layer_params: ')
+    # print(list(test_linear_model.feature_layer.parameters()))
+    # non_trainable_params = filter(lambda x: x.requires_grad == False,test_linear_model.parameters())
+    # print('non trainable_params: ')
+    # print(list(non_trainable_params))
+    # print('all params: ')
+    # print(list(test_linear_model.parameters()))
+    # print('output: ')
+    # print(y)
 
     # env_name = 'CartPole-v0'
     # env = GymEnv(env_name)
-    # lin_pol = LinearPolicy(env.spec)
-    # print(lin_pol.get_param_values())
+    # rbf_lin_pol = RBFLinearPolicy(env.spec, RBF_number=5)
+    # print(rbf_lin_pol.get_param_values())
 
-    # new_params = np.random.rand(lin_pol.get_param_values().size)
-    # lin_pol.set_param_values(new_params, True, False)
-    # print(lin_pol.get_param_values())
-
-    # env_name = 'Pendulum-v0'
-    # env = GymEnv(env_name)
-    # lin_pol = LinearPolicy(env.spec)
-    # print(lin_pol.get_action(env.reset()))
+    # new_params = np.random.rand(rbf_lin_pol.get_param_values().size)
+    # rbf_lin_pol.set_param_values(new_params, True, False)
+    # print(rbf_lin_pol.get_param_values())
 
     # env_name = 'Pendulum-v0'
     # env = GymEnv(env_name)
-    # lin_pol = LinearPolicy(env.spec)
-    # paths =base_sampler.do_rollout(1, lin_pol,T = 5, env_name = env_name)
-    # mean , LL = lin_pol.mean_LL(paths[0]['observations'], paths[0]['actions'])
-    # new_dist_info = lin_pol.new_dist_info(paths[0]['observations'], paths[0]['actions'])
+    # rbf_lin_pol = RBFLinearPolicy(env.spec)
+    # print(rbf_lin_pol.get_action(env.reset()))
+
+    # env_name = 'Pendulum-v0'
+    # env = GymEnv(env_name)
+    # rbf_lin_pol = RBFLinearPolicy(env.spec)
+    # paths =base_sampler.do_rollout(1, rbf_lin_pol,T = 5, env_name = env_name)
+    # mean , LL = rbf_lin_pol.mean_LL(paths[0]['observations'], paths[0]['actions'])
+    # new_dist_info = rbf_lin_pol.new_dist_info(paths[0]['observations'], paths[0]['actions'])
     # print('new dist info: ',new_dist_info)
-    # old_dist_info = lin_pol.old_dist_info(paths[0]['observations'], paths[0]['actions'])
+    # old_dist_info = rbf_lin_pol.old_dist_info(paths[0]['observations'], paths[0]['actions'])
     # print('old dist info: ', old_dist_info)
-    # likelihood_ratio = lin_pol.likelihood_ratio(new_dist_info, old_dist_info)
+    # likelihood_ratio = rbf_lin_pol.likelihood_ratio(new_dist_info, old_dist_info)
     # print('Likelihood ratio: ', likelihood_ratio)
-    # log_likelihood = lin_pol.log_likelihood(paths[0]['observations'], paths[0]['actions'])
+    # log_likelihood = rbf_lin_pol.log_likelihood(paths[0]['observations'], paths[0]['actions'])
     # print('Log likelihood: ', log_likelihood)
-    # mean_kl = lin_pol.mean_kl(new_dist_info, old_dist_info)
+    # mean_kl = rbf_lin_pol.mean_kl(new_dist_info, old_dist_info)
     # print('mean kl: ', mean_kl)
 
     # print(mean, LL)
