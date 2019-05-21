@@ -51,7 +51,7 @@ def do_rollout(N,
     # T = min(T, env.horizon) 
     T=T
 
-    print("####### Worker started #######")
+    # print("####### Worker started #######")
     
     paths = []
 
@@ -80,7 +80,7 @@ def do_rollout(N,
         while t < T and done != True:
             start_time = time.time()
             a, agent_info = policy.get_action(o)
-            print('time to get action: ', time.time() - start_time)
+            # print('time to get action: ', time.time() - start_time)
             start_time = time.time()
             next_o, r, done, env_info = env.step(a)
             #observations.append(o.ravel())
@@ -89,7 +89,7 @@ def do_rollout(N,
             rewards.append(r)
             agent_infos.append(agent_info)
             env_infos.append(env_info)
-            print('time to play action: ', time.time() - start_time)
+            # print('time to play action: ', time.time() - start_time)
             o = next_o
             t += 1
         path = dict(
@@ -103,7 +103,7 @@ def do_rollout(N,
 
         paths.append(path)
 
-    print("====== Worker finished ======")
+    # print("====== Worker finished ======")
     del(env)
     return paths
 
