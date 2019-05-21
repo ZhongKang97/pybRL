@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy
 import csv
-from mjrl.utils.logger import DataLog
+from pybRL.utils.logger import DataLog
 
 def make_train_plots(log = None,
                      log_path = None,

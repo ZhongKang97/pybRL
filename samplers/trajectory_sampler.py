@@ -8,16 +8,16 @@ import numpy as np
 import copy
 import multiprocessing as mp
 import time as timer
-import mjrl.samplers.base_sampler as base_sampler
-import mjrl.samplers.evaluation_sampler as eval_sampler
-from mjrl.samplers.base_sampler import RandomPolicy
+import pybRL.samplers.base_sampler as base_sampler
+import pybRL.samplers.evaluation_sampler as eval_sampler
+from pybRL.samplers.base_sampler import RandomPolicy
 
 #Testing speed for pybullet envs##########
-import mjrl.policies.gaussian_linear as gaussian_linear
-from mjrl.utils.gym_env import GymEnv
-import pybullet_envs
-import time
-import gym
+# import pybRL.policies.gaussian_linear as gaussian_linear
+# from pybRL.utils.gym_env import GymEnv
+# import pybullet_envs
+# import time
+# import gym
 ##########################################
 def sample_paths(N, policy, T=1e2, env=None, env_name=None, pegasus_seed=None, mode='sample'):
     """ 

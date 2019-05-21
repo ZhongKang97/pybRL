@@ -5,7 +5,7 @@ import time as timer
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
-from mjrl.utils.logger import DataLog
+from pybRL.utils.logger import DataLog
 from tqdm import tqdm
 
 class BC:

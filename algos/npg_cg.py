@@ -14,14 +14,14 @@ from torch.autograd import Variable
 import copy
 
 # samplers
-import mjrl.samplers.trajectory_sampler as trajectory_sampler
-import mjrl.samplers.batch_sampler as batch_sampler
+import pybRL.samplers.trajectory_sampler as trajectory_sampler
+import pybRL.samplers.batch_sampler as batch_sampler
 
 # utility functions
-import mjrl.utils.process_samples as process_samples
-from mjrl.utils.logger import DataLog
-from mjrl.utils.cg_solve import cg_solve
-from mjrl.algos.batch_reinforce import BatchREINFORCE
+import pybRL.utils.process_samples as process_samples
+from pybRL.utils.logger import DataLog
+from pybRL.utils.cg_solve import cg_solve
+from pybRL.algos.batch_reinforce import BatchREINFORCE
 
 
 class NPG(BatchREINFORCE):
@@ -34,7 +34,7 @@ class NPG(BatchREINFORCE):
                  save_logs=False,
                  kl_dist=None):
         """
-        All inputs are expected in mjrl's format unless specified
+        All inputs are expected in pybRL's format unless specified
         :param normalized_step_size: Normalized step size (under the KL metric). Twice the desired KL distance
         :param kl_dist: desired KL distance between steps. Overrides normalized_step_size.
         :param const_learn_rate: A constant learn rate under the L2 metric (won't work very well)

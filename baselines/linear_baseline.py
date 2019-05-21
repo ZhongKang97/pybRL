@@ -3,10 +3,10 @@ sys.path.append(os.path.realpath('../..'))
 
 import numpy as np
 import copy
-import mjrl.samplers.base_sampler as base_sampler
-from mjrl.samplers.base_sampler import RandomPolicy
-from mjrl.utils.gym_env import GymEnv
-# from mjrl.utils.process_samples import compute_returns ### If you uncomment you will break the 
+import pybRL.samplers.base_sampler as base_sampler
+from pybRL.samplers.base_sampler import RandomPolicy
+from pybRL.utils.gym_env import GymEnv
+# from pybRL.utils.process_samples import compute_returns ### If you uncomment you will break the 
 # import in process_samples.py and an error will appear when running that file Comment the process samples 
 # import or comment this import. Either will do.
 class LinearBaseline:

@@ -1,3 +1,5 @@
+import sys, os
+sys.path.append(os.path.realpath('../..'))
 import logging
 logging.disable(logging.CRITICAL)
 import numpy as np
@@ -11,16 +13,16 @@ from torch.autograd import Variable
 import copy
 
 # samplers
-import mjrl.samplers.trajectory_sampler as trajectory_sampler
-import mjrl.samplers.batch_sampler as batch_sampler
+import pybRL.samplers.trajectory_sampler as trajectory_sampler
+import pybRL.samplers.batch_sampler as batch_sampler
 
 # utility functions
-import mjrl.utils.process_samples as process_samples
-from mjrl.utils.logger import DataLog
-from mjrl.utils.cg_solve import cg_solve
+import pybRL.utils.process_samples as process_samples
+from pybRL.utils.logger import DataLog
+from pybRL.utils.cg_solve import cg_solve
 
 # Import NPG
-from mjrl.algos.npg_cg import NPG
+from pybRL.algos.npg_cg import NPG
 
 class TRPO(NPG):
     def __init__(self, env, policy, baseline,
@@ -31,7 +33,7 @@ class TRPO(NPG):
                  save_logs=False,
                  normalized_step_size=0.01):
         """
-        All inputs are expected in mjrl's format unless specified
+        All inputs are expected in pybRL's format unless specified
         :param normalized_step_size: Normalized step size (under the KL metric). Twice the desired KL distance
         :param kl_dist: desired KL distance between steps. Overrides normalized_step_size.
         :param const_learn_rate: A constant learn rate under the L2 metric (won't work very well)

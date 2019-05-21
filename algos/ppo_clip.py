@@ -1,3 +1,5 @@
+import sys, os
+sys.path.append(os.path.realpath('../..'))
 import logging
 logging.disable(logging.CRITICAL)
 import numpy as np
@@ -11,14 +13,14 @@ from torch.autograd import Variable
 import copy
 
 # samplers
-import mjrl.samplers.trajectory_sampler as trajectory_sampler
-import mjrl.samplers.batch_sampler as batch_sampler
+import pybRL.samplers.trajectory_sampler as trajectory_sampler
+import pybRL.samplers.batch_sampler as batch_sampler
 
 # utility functions
-import mjrl.utils.process_samples as process_samples
-from mjrl.utils.logger import DataLog
-from mjrl.utils.cg_solve import cg_solve
-from mjrl.algos.batch_reinforce import BatchREINFORCE
+import pybRL.utils.process_samples as process_samples
+from pybRL.utils.logger import DataLog
+from pybRL.utils.cg_solve import cg_solve
+from pybRL.algos.batch_reinforce import BatchREINFORCE
 
 
 class PPO(BatchREINFORCE):

@@ -14,17 +14,17 @@ from torch.autograd import Variable
 import copy
 
 # samplers
-import mjrl.samplers.trajectory_sampler as trajectory_sampler
-import mjrl.samplers.batch_sampler as batch_sampler
+import pybRL.samplers.trajectory_sampler as trajectory_sampler
+import pybRL.samplers.batch_sampler as batch_sampler
 
 # utility functions
-import mjrl.utils.process_samples as process_samples
-from mjrl.utils.logger import DataLog
+import pybRL.utils.process_samples as process_samples
+from pybRL.utils.logger import DataLog
 
 # Import stuff for testing
-import mjrl.baselines.linear_baseline as linear_baseline
-import mjrl.policies.gaussian_linear as linear_policy
-from mjrl.utils.gym_env import GymEnv
+import pybRL.baselines.linear_baseline as linear_baseline
+import pybRL.policies.gaussian_linear as linear_policy
+from pybRL.utils.gym_env import GymEnv
 
 class BatchREINFORCE:
     def __init__(self, env, policy, baseline,

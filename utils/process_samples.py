@@ -2,9 +2,9 @@ import sys, os
 sys.path.append(os.path.realpath('../..'))
 
 import numpy as np
-import mjrl.samplers.base_sampler as base_sampler
-import mjrl.baselines.linear_baseline as linear_baseline
-from mjrl.utils.gym_env import GymEnv
+import pybRL.samplers.base_sampler as base_sampler
+import pybRL.baselines.linear_baseline as linear_baseline
+from pybRL.utils.gym_env import GymEnv
 def compute_returns(paths, gamma):
     """
     Computes returns for a given trajectory sample

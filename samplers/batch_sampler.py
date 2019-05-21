@@ -6,10 +6,10 @@ logging.disable(logging.CRITICAL)
 
 import numpy as np
 import time as timer
-import mjrl.samplers.base_sampler as base_sampler
-import mjrl.samplers.evaluation_sampler as eval_sampler
-import mjrl.samplers.trajectory_sampler as trajectory_sampler
-from mjrl.utils.get_environment import get_environment
+import pybRL.samplers.base_sampler as base_sampler
+import pybRL.samplers.evaluation_sampler as eval_sampler
+import pybRL.samplers.trajectory_sampler as trajectory_sampler
+from pybRL.utils.get_environment import get_environment
 
 def sample_paths(N,
     policy,

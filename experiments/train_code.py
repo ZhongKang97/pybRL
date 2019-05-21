@@ -1,18 +1,18 @@
 import sys, os
 sys.path.append(os.path.realpath('../..'))
 
-import mjrl.utils.train_agent as train_agent
-# import mjrl.algos.batch_reinforce as batch_reinforce
-from mjrl.utils.gym_env import GymEnv
-import mjrl.samplers.trajectory_sampler as trajectory_sampler
+import pybRL.utils.train_agent as train_agent
+# import pybRL.algos.batch_reinforce as batch_reinforce
+from pybRL.utils.gym_env import GymEnv
+import pybRL.samplers.trajectory_sampler as trajectory_sampler
 
-import mjrl.policies.gaussian_linear as linear_policy
+import pybRL.policies.gaussian_linear as linear_policy
 
-import mjrl.baselines.linear_baseline as linear_baseline
-import mjrl.baselines.mlp_baseline as MLPBaseline
+import pybRL.baselines.linear_baseline as linear_baseline
+import pybRL.baselines.mlp_baseline as MLPBaseline
 
-import mjrl.algos.npg_cg as npg
-import mjrl.algos.ppo_clip as ppo
+import pybRL.algos.npg_cg as npg
+import pybRL.algos.ppo_clip as ppo
 
 import pybullet_envs
 import pybulletgym

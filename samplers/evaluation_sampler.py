@@ -6,8 +6,8 @@ import logging
 logging.disable(logging.CRITICAL)
 
 import numpy as np
-from mjrl.utils.get_environment import get_environment
-from mjrl.utils import tensor_utils
+from pybRL.utils.get_environment import get_environment
+from pybRL.utils import tensor_utils
 
 
 # Single core rollout to sample trajectories

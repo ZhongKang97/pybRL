@@ -5,9 +5,9 @@ import logging
 logging.disable(logging.CRITICAL)
 
 from tabulate import tabulate
-from mjrl.utils.make_train_plots import make_train_plots
-from mjrl.utils.gym_env import GymEnv
-from mjrl.samplers.trajectory_sampler import sample_paths_parallel
+from pybRL.utils.make_train_plots import make_train_plots
+from pybRL.utils.gym_env import GymEnv
+from pybRL.samplers.trajectory_sampler import sample_paths_parallel
 import numpy as np
 import pickle
 import time as timer

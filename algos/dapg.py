@@ -11,17 +11,17 @@ from torch.autograd import Variable
 import copy
 
 # samplers
-import mjrl.samplers.trajectory_sampler as trajectory_sampler
-import mjrl.samplers.batch_sampler as batch_sampler
+import pybRL.samplers.trajectory_sampler as trajectory_sampler
+import pybRL.samplers.batch_sampler as batch_sampler
 
 # utility functions
-import mjrl.utils.process_samples as process_samples
-from mjrl.utils.logger import DataLog
-from mjrl.utils.cg_solve import cg_solve
+import pybRL.utils.process_samples as process_samples
+from pybRL.utils.logger import DataLog
+from pybRL.utils.cg_solve import cg_solve
 
 # Import Algs
-from mjrl.algos.npg_cg import NPG
-from mjrl.algos.behavior_cloning import BC
+from pybRL.algos.npg_cg import NPG
+from pybRL.algos.behavior_cloning import BC
 
 class DAPG(NPG):
     def __init__(self, env, policy, baseline,

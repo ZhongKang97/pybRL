@@ -6,8 +6,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
-from mjrl.utils.gym_env import GymEnv
-from mjrl.samplers import base_sampler
+from pybRL.utils.gym_env import GymEnv
+from pybRL.samplers import base_sampler
 class RBFLinearPolicy:
     def __init__(self, env_spec,
                  min_log_std=-3,
@@ -297,4 +297,5 @@ if(__name__ == "__main__"):
     # print('mean kl: ', mean_kl)
 
     # print(mean, LL)
+    pass
 
