@@ -13,6 +13,7 @@ class RBFLinearPolicy:
                  min_log_std=-3,
                  init_log_std=0,
                  RBF_number = 100,
+                 avg_pairwise_distance = 1,
                  seed=None):
         """
         :param env_spec: specifications of the env (see utils/gym_env.py)
@@ -24,6 +25,7 @@ class RBFLinearPolicy:
         self.m = env_spec.action_dim  # number of actions
         self.min_log_std = min_log_std
         self.feature_count = RBF_number
+        self.mean_dist = avg_pairwise_distance
         # Set seed
         # ------------------------
         if seed is not None:
@@ -32,7 +34,7 @@ class RBFLinearPolicy:
 
         # Policy network
         # ------------------------
-        self.model = RBFLinearModel(self.n, self.m, self.feature_count)
+        self.model = RBFLinearModel(self.n, self.m, RBF_features = self.feature_count, avg_pairwise_distance= self.mean_dist)
         # make weights small -- not sure why but he wants to make the last weights very small (for linear and MLP alike)
         # for param in list(self.model.parameters())[-2:]:  # only last layer
         #    param.data = 1e-2 * param.data
@@ -282,7 +284,7 @@ if(__name__ == "__main__"):
 
     # env_name = 'Pendulum-v0'
     # env = GymEnv(env_name)
-    # rbf_lin_pol = RBFLinearPolicy(env.spec)
+    # rbf_lin_pol = RBFLinearPolicy(env.spec, avg_pairwise_distance=100)
     # paths =base_sampler.do_rollout(1, rbf_lin_pol,T = 5, env_name = env_name)
     # mean , LL = rbf_lin_pol.mean_LL(paths[0]['observations'], paths[0]['actions'])
     # new_dist_info = rbf_lin_pol.new_dist_info(paths[0]['observations'], paths[0]['actions'])

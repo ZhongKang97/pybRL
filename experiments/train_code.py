@@ -14,14 +14,23 @@ import pybRL.baselines.mlp_baseline as MLPBaseline
 import pybRL.algos.npg_cg as npg
 import pybRL.algos.ppo_clip as ppo
 
+import pybRL.samplers.base_sampler as base_sampler
+import pybRL.utils.process_samples as process_samples
+
 import pybullet_envs
 import pybulletgym
 SEED = 500
 ENV_ID = 'MinitaurTrottingEnv-v0'
 lr = 1e-2
 env = GymEnv(ENV_ID)
+#Getting the average pairwise distance -- You need to only run this once, then just manually save it's value in mean_dist variable for a particular environment
+# sample_policy = linear_policy.LinearPolicy(env.spec)
+# paths = base_sampler.do_rollout(100, sample_policy,T=100, env = env)
+# mean_dist = process_samples.get_avg_step_distance(paths)
+mean_dist = 1.8115
+
 # policy = linear_policy.LinearPolicy(env.spec)
-policy = RBF_linear.RBFLinearPolicy(env_spec, RBF_number=500)
+policy = RBF_linear.RBFLinearPolicy(env.spec, RBF_number=500)
 # baseline = linear_baseline.LinearBaseline(env.spec)
 baseline = MLPBaseline.MLPBaseline(env.spec, reg_coef=1e-3, batch_size=64, epochs=5, learn_rate=1e-3)
 # agent = batch_reinforce.BatchREINFORCE(env, policy, baseline, learn_rate=5e-3, seed = None, save_logs=True)
@@ -44,5 +53,5 @@ args = dict(
  )
 train_agent.train_agent(**args)
 
-# paths = trajectory_sampler.sample_paths_parallel(10, policy, env_name = ENV_ID)
-# print(paths)
+paths = trajectory_sampler.sample_paths_parallel(10, policy, env_name = ENV_ID)
+print(paths)
