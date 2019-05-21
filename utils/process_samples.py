@@ -70,6 +70,22 @@ def discount_sum(x, gamma, terminal=0.0):
 
     return np.array(y[::-1]) # Basically that indexing reverses the array
 
+def get_avg_step_distance(paths):
+    """
+    Returns approximately the average pairwise distance between two observations in an environment. (Strongly depends on the initial policies capabilities)
+    :param paths: List of dictionaries as taken by base sampler
+    :return : Numpy int which is the average pairwise distance between 2 observations in an environment.
+    """
+    observations = np.concatenate([path["observations"] for path in paths])
+    array = np.zeros(100)
+    for i in range(100):
+        first_obs, second_obs = np.random.choice(np.arange(observations.shape[0]), size = 2, replace = False)
+        first_obs = observations[first_obs]
+        second_obs = observations[second_obs]
+        pairwise_dist = np.linalg.norm(first_obs-second_obs)
+        array[i] = pairwise_dist
+    mean = np.mean(array)
+    return mean
 if(__name__ == "__main__"):
 
     # x = [0,0,0,0,1]
@@ -88,4 +104,5 @@ if(__name__ == "__main__"):
     compute_returns(paths, gamma)
     baseline = linear_baseline.LinearBaseline(env.spec)
     compute_advantages(paths, baseline, gamma, gae_lambda=0.9 )
-    print(paths)
+    mean = get_avg_step_distance(paths)
+    print(mean)

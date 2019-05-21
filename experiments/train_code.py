@@ -7,7 +7,7 @@ from pybRL.utils.gym_env import GymEnv
 import pybRL.samplers.trajectory_sampler as trajectory_sampler
 
 import pybRL.policies.gaussian_linear as linear_policy
-
+import pybRL.policies.RBF_linear as RBF_linear
 import pybRL.baselines.linear_baseline as linear_baseline
 import pybRL.baselines.mlp_baseline as MLPBaseline
 
@@ -17,17 +17,18 @@ import pybRL.algos.ppo_clip as ppo
 import pybullet_envs
 import pybulletgym
 SEED = 500
-ENV_ID = 'HalfCheetahPyBulletEnv-v0'
+ENV_ID = 'MinitaurTrottingEnv-v0'
 lr = 1e-2
 env = GymEnv(ENV_ID)
-policy = linear_policy.LinearPolicy(env.spec)
+# policy = linear_policy.LinearPolicy(env.spec)
+policy = RBF_linear.RBFLinearPolicy(env_spec, RBF_number=500)
 # baseline = linear_baseline.LinearBaseline(env.spec)
 baseline = MLPBaseline.MLPBaseline(env.spec, reg_coef=1e-3, batch_size=64, epochs=5, learn_rate=1e-3)
 # agent = batch_reinforce.BatchREINFORCE(env, policy, baseline, learn_rate=5e-3, seed = None, save_logs=True)
 agent = npg.NPG(env, policy, baseline, normalized_step_size=0.01, seed=None, hvp_sample_frac=1.0, save_logs=True, kl_dist=None)
 # agent = ppo.PPO(env, policy, baseline, clip_coef=0.2, epochs=10, mb_size=64, learn_rate=3e-4, save_logs=True)
 args = dict(
-                job_name = 'HalfCheetah_exp1',
+                job_name = 'MinitaurTrot_exp1',
                 agent = agent,
                 seed = 0,
                 niter = 500,
