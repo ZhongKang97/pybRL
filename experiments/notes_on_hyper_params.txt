@@ -1,0 +1,1 @@
+Increasing number of trajectories does not speed up or slow down learning. By making the trajectories 5 times, I reached the same amount of learning, as I would with the normal trajectory size after 5 times the iterations.
