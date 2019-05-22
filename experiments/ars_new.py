@@ -40,6 +40,17 @@ class HyperParameters():
         self.noise = noise
         self.seed = seed
         self.env_name = env_name
+    
+    def to_text(self, path):
+        res_str = ''
+        res_str = res_str + 'learning_rate: ' + str(self.learning_rate) + '\n'
+        res_str = res_str + 'noise: ' + str(self.noise) + '\n'
+        res_str = res_str + 'env_name: ' + str(self.env_name) + '\n'
+        res_str = res_str + 'episode_length: ' + str(self.episode_length) + '\n'
+        fileobj = open(path, 'w')
+        fileobj.write(res_str)
+        fileobj.close()
+ 
 # Normalizing the states
 class Normalizer():
 
@@ -178,6 +189,7 @@ def train(env, policy, normalizer, hp, job_name = "default_exp"):
     os.chdir(job_name)
     if os.path.isdir('iterations') == False: os.mkdir('iterations')
     if os.path.isdir('logs') ==False: os.mkdir('logs')
+    hp.to_text('hyperparameters')
     for step in range(hp.nb_steps):
         # Initializing the perturbations deltas and the positive/negative rewards
         deltas = policy.sample_deltas(hp)
@@ -188,14 +200,14 @@ def train(env, policy, normalizer, hp, job_name = "default_exp"):
         for k in range(hp.nb_directions):
             positive_rewards[k], step_count_positive = explore(
                 env, normalizer, policy, "positive", deltas[k], hp)
-            break
-            print('done: ',k)
+            # break
+            # print('done: ',k)
         # Getting the negative rewards in the negative/opposite directions
         for k in range(hp.nb_directions):
             negative_rewards[k], step_count_negative = explore(
                 env, normalizer, policy, "negative", deltas[k], hp)
-            break
-            print('done: ', k)   
+            # break
+            # print('done: ', k)   
         total_steps = total_steps + step_count_positive + step_count_negative
 
         # Sorting the rollouts by the max(r_pos, r_neg) and selecting the best directions
@@ -281,6 +293,8 @@ if __name__ == "__main__":
     parser.add_argument('--movie', help='rgb_array gym movie', type=int, default=0)
     parser.add_argument('--steps', help='Number of steps', type=int, default=10000)
     parser.add_argument('--policy', help='Starting policy file (npy)', type=str, default='')
+    parser.add_argument('--lr', help='learning rate', type=float, default=0.02)
+    parser.add_argument('--noise', help='noise hyperparameter', type=float, default=0.03)
     parser.add_argument(
             '--logdir', help='Directory root to log policy files (npy)', type=str, default='.')
     args = parser.parse_args()
@@ -302,6 +316,6 @@ if __name__ == "__main__":
     normalizer = Normalizer(nb_inputs)
 
     print("start training")
-    train(env, policy, normalizer, hp)
+    train(env, policy, normalizer, hp, args.logdir)
 
     pass
