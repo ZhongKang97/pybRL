@@ -221,7 +221,7 @@ def train(env, policy, normalizer, hp, job_name = "default_exp"):
                     for k in order]
         
         # Gathering all the positive/negative rewards to compute the standard deviation of these rewards
-        all_rewards = np.array(rollouts[:][0] + rollouts[:][1])
+        all_rewards = np.array([x[0] for x in rollouts] + [x[1] for x in rollouts])
         sigma_r = all_rewards.std() # Standard deviation of only rewards in the best directions is what it should be
 
         # Updating our policy
