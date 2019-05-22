@@ -263,7 +263,7 @@ class RBFLinearModel(nn.Module):
             # out = out * self.out_scale + self.out_shift
             # for line in traceback.format_stack():
             #     print(line.strip())
-            # pdb.set_trace()
+            pdb.set_trace()
             pass
         return out
     

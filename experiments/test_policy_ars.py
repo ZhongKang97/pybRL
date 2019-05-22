@@ -13,7 +13,7 @@ import pybullet as p
 import numpy as np
 # p.connect(p.GUI)
 env = e.MinitaurTrottingEnv(render=True)
-path = '/home/abhik/pybRL/experiments/policy_MinitaurTrottingEnv-v0_20190522-110409.npy'
+path = '/home/sashank/mjrl-master/pybRL/experiments/policy_MinitaurTrottingEnv-v0_20190522-110536.npy'
 state = env.reset()
 
 i = 0

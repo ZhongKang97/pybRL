@@ -1,1 +1,3 @@
 Increasing number of trajectories does not speed up or slow down learning. By making the trajectories 5 times, I reached the same amount of learning, as I would with the normal trajectory size after 5 times the iterations.
+Learning rate 0.01 seems to work best
+Baseline learning rate of 5e-3 might be better of 1e-3, no definite conclusions

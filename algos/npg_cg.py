@@ -23,6 +23,7 @@ from pybRL.utils.logger import DataLog
 from pybRL.utils.cg_solve import cg_solve
 from pybRL.algos.batch_reinforce import BatchREINFORCE
 
+import pdb
 
 class NPG(BatchREINFORCE):
     def __init__(self, env, policy, baseline,
@@ -161,6 +162,8 @@ class NPG(BatchREINFORCE):
         # --------------------------
         curr_params = self.policy.get_param_values()
         new_params = curr_params + alpha * npg_grad
+        if(np.any(np.isnan(new_params))):
+            pdb.set_trace()
         self.policy.set_param_values(new_params, set_new=True, set_old=False)
         reinforce_loss_after = self.compute_reinforce_loss(observations, actions, advantages).data.numpy().ravel()[0]
         kl_dist = self.kl_old_new(observations, actions).data.numpy().ravel()[0]
