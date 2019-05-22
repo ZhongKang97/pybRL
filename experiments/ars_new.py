@@ -302,6 +302,8 @@ if __name__ == "__main__":
     hp.env_name = args.env
     hp.seed = args.seed
     hp.nb_steps = args.steps
+    hp.learning_rate = args.lr
+    hp.noise = args.noise
     print("seed = ", hp.seed)
     np.random.seed(hp.seed)
 
