@@ -13,6 +13,7 @@ import os
 import inspect
 from pybRL.utils.logger import DataLog
 from pybRL.utils.make_train_plots import make_train_plots_ars
+from gym.envs.registration import registry, register, make, spec
 
 # currentdir = os.path.dirname(os.path.abspath(
 #     inspect.getfile(inspect.currentframe())))

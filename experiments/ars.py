@@ -195,7 +195,6 @@ def train(env, policy, normalizer, hp, parentPipes, args):
     # Gathering all the positive/negative rewards to compute the standard deviation of these rewards
     all_rewards = np.array(positive_rewards + negative_rewards)
     sigma_r = all_rewards.std()
-
     # Sorting the rollouts by the max(r_pos, r_neg) and selecting the best directions
     scores = {
         k: max(r_pos, r_neg)

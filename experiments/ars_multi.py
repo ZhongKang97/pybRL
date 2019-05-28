@@ -17,7 +17,9 @@ import argparse
 from pybRL.utils.logger import DataLog
 from pybRL.utils.make_train_plots import make_train_plots_ars
 
-
+#Registering new environments
+from gym.envs.registration import registry, register, make, spec
+import pybRL.envs.stoch2_gym_bullet_env as stoch2_gym_env
 # Setting the Hyper Parameters
 class HyperParameters():
     """
@@ -192,22 +194,38 @@ def train(env, policy, normalizer, hp, parentPipes, args):
     deltas = policy.sample_deltas()
     positive_rewards = [0] * hp.nb_directions
     negative_rewards = [0] * hp.nb_directions
-
+    if(parentPipes):
+      process_count = len(parentPipes)
     if parentPipes:
-      for k in range(hp.nb_directions):
-        parentPipe = parentPipes[k]
-        parentPipe.send([_EXPLORE, [normalizer, policy, hp, "positive", deltas[k]]])
-      for k in range(hp.nb_directions):
-        positive_rewards[k], step_count = parentPipes[k].recv()
-        total_steps = total_steps + step_count
+      p = 0
+      while(p < hp.nb_directions):
+        temp_p = p
+        n_left = hp.nb_directions - p #Number of processes required to complete the search
+        for k in range(min([process_count, n_left])):
+          parentPipe = parentPipes[k]
+          parentPipe.send([_EXPLORE, [normalizer, policy, hp, "positive", deltas[temp_p]]])
+          temp_p = temp_p+1
+        temp_p = p
+        for k in range(min([process_count, n_left])):
+          positive_rewards[temp_p], step_count = parentPipes[k].recv()
+          total_steps = total_steps + step_count
+          temp_p = temp_p+1
+        temp_p = p
 
-      for k in range(hp.nb_directions):
-        parentPipe = parentPipes[k]
-        parentPipe.send([_EXPLORE, [normalizer, policy, hp, "negative", deltas[k]]])
-      for k in range(hp.nb_directions):
-        negative_rewards[k], step_count = parentPipes[k].recv()
-        total_steps = total_steps + step_count
+        for k in range(min([process_count, n_left])):
+          parentPipe = parentPipes[k]
+          parentPipe.send([_EXPLORE, [normalizer, policy, hp, "negative", deltas[temp_p]]])
+          temp_p = temp_p+1
+        temp_p = p
 
+        for k in range(min([process_count, n_left])):
+          negative_rewards[temp_p], step_count = parentPipes[k].recv()
+          total_steps = total_steps + step_count
+          temp_p = temp_p+1
+        p = p + process_count
+
+        print('mp step has worked, p: ', p)
+        
     else:
       # Getting the positive rewards in the positive directions
       for k in range(hp.nb_directions):
@@ -257,8 +275,11 @@ def mkdir(base, name):
 
 
 if __name__ == "__main__":
+  #Custom environments that you want to register
+  register(id='Stoch2-v0',entry_point='pybRL.envs.stoch2_gym_bullet_env:Stoch2Env')
+  #--------------------------------------------------------------------------------------------
+  
   mp.freeze_support()
-
   parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
   parser.add_argument(
       '--env', help='Gym environment name', type=str, default='MinitaurTrottingEnv-v0')
@@ -272,7 +293,7 @@ if __name__ == "__main__":
   parser.add_argument('--mp', help='Enable multiprocessing', type=int, default=1)
   parser.add_argument('--lr', help='learning rate', type=float, default=0.02)
   parser.add_argument('--noise', help='noise hyperparameter', type=float, default=0.03)
-  parser.add_argument('--episode_length', help='length of each episode', type=float, default=1000)
+  parser.add_argument('--episode_length', help='length of each episode', type=float, default=10)
 
   args = parser.parse_args()
 
@@ -285,11 +306,12 @@ if __name__ == "__main__":
   hp.episode_length = args.episode_length
   print("seed = ", hp.seed)
   np.random.seed(hp.seed)
-
+  max_processes = 6
 
   parentPipes = None
   if args.mp:
-    num_processes = hp.nb_directions
+    num_processes = min([hp.nb_directions, max_processes])
+    print('processes: ',num_processes)
     processes = []
     childPipes = []
     parentPipes = []
@@ -304,7 +326,8 @@ if __name__ == "__main__":
       p.start()
       processes.append(p)
 
-  env = gym.make(hp.env_name)
+  # env = gym.make(hp.env_name)
+  env = stoch2_gym_env.Stoch2Env(render = False)
   nb_inputs = env.observation_space.shape[0]
   nb_outputs = env.action_space.shape[0]
   policy = Policy(nb_inputs, nb_outputs, hp.env_name, args)
