@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+logdir/*
+outdir/*
+
+# Pip
+pip-selfcheck.json
+*.whl
+*.egg
+*.egg-info
+
+# Setuptools
+/build
+/dist
+*.eggs
