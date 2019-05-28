@@ -347,6 +347,12 @@ class Stoch2Env(gym.Env):
         return np.concatenate([pos,ori]).ravel()
     
     def GetObservationReset(self):
+        """
+        Resets the robot and returns the base position and Orientation with a random error
+        :param : None, should be called in the reset function if an error in initial pos is desired
+        :return : Initial state with an error.
+        Robot starts in the same position, only it's readings have some error. 
+        """
         observation = []
         pos, ori = self.GetBasePosAndOrientation()
         pos = np.array(pos)
