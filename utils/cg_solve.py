@@ -1,5 +1,4 @@
 import numpy as np
-import pdb
 def cg_solve(f_Ax, b, x_0=None, cg_iters=10, residual_tol=1e-10):
     """ Works well only with sparse matrices. Implements conjugate gradients. Takes in a function that returns Ax, and a constant matrix B. 
     It returns x, which is a close solution """
@@ -11,8 +10,6 @@ def cg_solve(f_Ax, b, x_0=None, cg_iters=10, residual_tol=1e-10):
     for i in range(cg_iters):
         z = f_Ax(p)
         v = rdotr / p.dot(z)
-        if(np.isnan(v)):
-                pdb.set_trace()
         x += v * p
         r -= v * z
         newrdotr = r.dot(r)

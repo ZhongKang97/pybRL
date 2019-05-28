@@ -54,8 +54,6 @@ class BatchREINFORCE:
         new_dist_info = self.policy.new_dist_info(observations, actions)
         log_policy = self.policy.likelihood_ratio(new_dist_info, old_dist_info)
         loss = torch.mean(log_policy*adv_var)
-        if(np.isinf(loss.data.numpy())):
-            pdb.set_trace()
         return loss
 
     def kl_old_new(self, observations, actions):
@@ -77,9 +75,6 @@ class BatchREINFORCE:
             pdb.set_trace()
         vpg_grad = torch.autograd.grad(loss, self.policy.trainable_params)
         vpg_grad = np.concatenate([g.contiguous().view(-1).data.numpy() for g in vpg_grad])
-        if(np.linalg.norm(vpg_grad)> 1):
-            vpg_grad = vpg_grad * 1e2/np.linalg.norm(vpg_grad)
-            # pdb.set_trace()
         return vpg_grad
 
     def train_step(self, N,
