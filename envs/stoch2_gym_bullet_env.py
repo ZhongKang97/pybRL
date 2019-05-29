@@ -159,7 +159,7 @@ class Stoch2Env(gym.Env):
         self._pybullet_client.resetDebugVisualizerCamera(self._cam_dist, self._cam_yaw, self._cam_pitch, [0, 0, 0])
         self._n_steps = 0
               
-        return self.GetObservation()
+        return self.GetObservationReset()
     
     def step(self, action, callback=None):
         energy_spent_per_step, cost_reference = self.do_simulation(action, n_frames = self._frame_skip, callback=callback)
@@ -343,7 +343,35 @@ class Stoch2Env(gym.Env):
 #         observation.extend(list(pos))
 #         observation.extend(self.GetMotorAngles().tolist())
 #         observation.extend(self.GetMotorVelocities().tolist())
+
         return np.concatenate([pos,ori]).ravel()
+    
+    def GetObservationReset(self):
+        """
+        Resets the robot and returns the base position and Orientation with a random error
+        :param : None, should be called in the reset function if an error in initial pos is desired
+        :return : Initial state with an error.
+        Robot starts in the same position, only it's readings have some error. 
+        """
+        observation = []
+        pos, ori = self.GetBasePosAndOrientation()
+        pos = np.array(pos)
+        ori = np.array(ori)
+#         observation.extend(list(pos))
+#         observation.extend(self.GetMotorAngles().tolist())
+#         observation.extend(self.GetMotorVelocities().tolist())
+        # print('pos before: ', pos)
+        pos = pos + np.random.normal(scale = 0.03, size = 3)
+        # print('pos after: ', pos)
+        rpy = self._pybullet_client.getEulerFromQuaternion(ori)
+        # print('rpy before: ', pos)
+        # print('ori before: ', ori)
+        rpy = rpy + np.random.normal(scale = np.pi/180, size = 3)
+        ori = self._pybullet_client.getQuaternionFromEuler(rpy)
+        # print('rpy afer: ', rpy)
+        # print('ori after: ', ori)
+        return np.concatenate([pos,ori]).ravel()
+
 
     def GetMotorAngles(self):
         motor_ang = [self._pybullet_client.getJointState(self.stoch2, motor_id)[0] for motor_id in self._motor_id_list]
@@ -502,4 +530,6 @@ class Stoch2Env(gym.Env):
 
 
 if(__name__ == "__main__"):
-    print('abc123')
+    env = Stoch2Env()
+    state = env.reset()
+    print(state)
