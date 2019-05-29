@@ -1,0 +1,4 @@
+learning_rate: 0.001
+noise: 0.03
+env_name: Stoch2-v0
+episode_length: 20.0
