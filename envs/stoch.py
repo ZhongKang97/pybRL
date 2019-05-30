@@ -387,7 +387,7 @@ class Stoch(object):
     observation.extend(self.GetMotorVelocities().tolist())
     observation.extend(self.GetMotorTorques().tolist())
     observation.extend(list(self.GetBaseOrientation()))
-    return observation
+    return observation[0:8] + observation[24:28]
 
   def ApplyAction(self, motor_commands):
     """Set the desired motor angles to the motors of the stoch.
