@@ -19,7 +19,11 @@ from pybRL.utils.make_train_plots import make_train_plots_ars
 
 #Registering new environments
 from gym.envs.registration import registry, register, make, spec
-import pybRL.envs.stoch2_gym_bullet_env as stoch2_gym_env
+
+#Stoch 2 Test imports
+import pybullet as p 
+import numpy as np
+import pybRL.envs.stoch2_gym_bullet_env_normal as sv
 # Setting the Hyper Parameters
 class HyperParameters():
     """
@@ -55,7 +59,7 @@ _EXPLORE = 3
 
 def ExploreWorker(rank, childPipe, envname, args):
   env = gym.make(envname)
-  nb_inputs = env.observation_space.shape[0]
+  nb_inputs = env.observation_space.sample().shape[0]
   normalizer = Normalizer(nb_inputs)
   observation_n = env.reset()
   n = 0
@@ -87,9 +91,10 @@ def ExploreWorker(rank, childPipe, envname, args):
         state = normalizer.normalize(state)
         action = policy.evaluate(state, delta, direction, hp)
         state, reward, done, _ = env.step(action)
-        reward = max(min(reward, 1), -1)
+        # reward = max(min(reward, 1), -1)
         sum_rewards += reward
         num_plays += 1
+      # print('rewards: ',sum_rewards)
       childPipe.send([sum_rewards, num_plays])
       continue
     if message == _CLOSE:
@@ -167,7 +172,7 @@ def explore(env, normalizer, policy, direction, delta, hp):
     state = normalizer.normalize(state)
     action = policy.evaluate(state, delta, direction, hp)
     state, reward, done, _ = env.step(action)
-    reward = max(min(reward, 1), -1)
+    # reward = max(min(reward, 1), -1)
     sum_rewards += reward
     num_plays += 1
   return sum_rewards
@@ -243,7 +248,7 @@ def train(env, policy, normalizer, hp, parentPipes, args):
         k: max(r_pos, r_neg)
         for k, (r_pos, r_neg) in enumerate(zip(positive_rewards, negative_rewards))
     }
-    order = sorted(scores.keys(), key=lambda x: -scores[x])[:hp.nb_best_directions]
+    order = sorted(scores.keys(), key=lambda x: -scores[x])[:int(hp.nb_best_directions)]
     rollouts = [(positive_rewards[k], negative_rewards[k], deltas[k]) for k in order]
 
     # Updating our policy
@@ -274,12 +279,8 @@ def mkdir(base, name):
   return path
 
 
-if __name__ == "__main__":
-  #Custom environments that you want to register
-  register(id='Stoch2-v0',entry_point='pybRL.envs.stoch2_gym_bullet_env:Stoch2Env')
-  #--------------------------------------------------------------------------------------------
-  
-  mp.freeze_support()
+if __name__ == "__main__":  
+  # mp.freeze_support()
   parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
   parser.add_argument(
       '--env', help='Gym environment name', type=str, default='MinitaurTrottingEnv-v0')
@@ -291,19 +292,31 @@ if __name__ == "__main__":
   parser.add_argument(
       '--logdir', help='Directory root to log policy files (npy)', type=str, default='.')
   parser.add_argument('--mp', help='Enable multiprocessing', type=int, default=1)
-  parser.add_argument('--lr', help='learning rate', type=float, default=0.02)
+  parser.add_argument('--lr', help='learning rate', type=float, default=0.2)
   parser.add_argument('--noise', help='noise hyperparameter', type=float, default=0.03)
   parser.add_argument('--episode_length', help='length of each episode', type=float, default=10)
-
+  parser.add_argument('--gait', help='type of gait you want (Only in Stoch2 normal env', type=str, default='trot')
   args = parser.parse_args()
+ 
+  # #Custom environments that you want to use ----------------------------------------------------------------------------------------
+  register(id='Stoch2-v0',entry_point='pybRL.envs.stoch2_gym_bullet_env_bezier:Stoch2Env')
+  register(id='Stoch2-v1',entry_point='pybRL.envs.stoch2_gym_bullet_env_normal:StochBulletEnv', kwargs = {'gait': 'trot'})
+  # #---------------------------------------------------------------------------------------------------------------------------------
 
   hp = HyperParameters()
   hp.env_name = args.env
+  env = gym.make(hp.env_name)
   hp.seed = args.seed
   hp.nb_steps = args.steps
   hp.learning_rate = args.lr
   hp.noise = args.noise
   hp.episode_length = args.episode_length
+  hp.nb_directions = int(env.observation_space.sample().shape[0] * env.action_space.sample().shape[0])
+  hp.nb_best_directions = int(hp.nb_directions / 4)
+  # print('number directions: ', hp.nb_directions)
+  # print('number best directions: ', hp.nb_best_directions)
+  # exit()
+  # print(hp.nb_best_directions)
   print("seed = ", hp.seed)
   np.random.seed(hp.seed)
   max_processes = 6
@@ -326,10 +339,9 @@ if __name__ == "__main__":
       p.start()
       processes.append(p)
 
-  # env = gym.make(hp.env_name)
-  env = stoch2_gym_env.Stoch2Env(render = False)
-  nb_inputs = env.observation_space.shape[0]
-  nb_outputs = env.action_space.shape[0]
+  # env = stoch2_gym_env.StochBulletEnv(render = False, gait = 'trot')
+  nb_inputs = env.observation_space.sample().shape[0]
+  nb_outputs = env.action_space.sample().shape[0]
   policy = Policy(nb_inputs, nb_outputs, hp.env_name, args)
   normalizer = Normalizer(nb_inputs)
 
@@ -342,3 +354,34 @@ if __name__ == "__main__":
 
     for p in processes:
       p.join()
+
+  # --------------------------------------------------------------------------------
+  # STOCH2 Test
+  # env = sv.StochBulletEnv(render = True, gait = 'trot')
+  # env = gym.make('Stoch2-v1')
+  # hp = HyperParameters()
+  # nb_inputs = env.observation_space.shape[0]
+  # nb_outputs = env.action_space.shape[0]
+  # policy = Policy(nb_inputs, nb_outputs, hp.env_name, None)
+  # normalizer = Normalizer(nb_inputs)
+
+  # deltas = policy.sample_deltas()
+  # state = env.reset()
+  # i = 0
+  # hp.noise = 0.2
+  # sum_rewards = 0
+  # while i <1000:
+  #   normalizer.observe(state)
+  #   # print('state before: ', state)
+  #   state = normalizer.normalize(state)
+  #   # print('state after: ', state)
+  #   action = policy.evaluate(state, deltas[0], 'positive', hp)
+  #   # print(action)
+  #   state, reward, done ,info = env.step(np.clip(action, -1, 1))
+  #   sum_rewards = sum_rewards + reward
+  #   if(done):
+  #     print('terminated')
+  #     break
+  #   i = i + 1
+  
+  # print('total reward: ', sum_rewards)
