@@ -45,12 +45,12 @@ class StochBulletEnv(gym.Env):
   """
   metadata = {
       "render.modes": ["human", "rgb_array"],
-      "video.frames_per_second": 50
+      "video.frames_per_second": 60
   }
 
   def __init__(self,
                urdf_root=pybullet_data.getDataPath(),
-               action_repeat=1,
+               action_repeat=5,
                distance_weight=1.0,
                energy_weight=0.02,
                shake_weight=0.0,
@@ -161,7 +161,7 @@ class StochBulletEnv(gym.Env):
     self.log_buff = False
     self.c = 0
 
-    self._seed()
+    self.seed()
     self.reset()
 
     #State space
@@ -202,7 +202,7 @@ class StochBulletEnv(gym.Env):
   def configure(self, args):
     self._args = args
 
-  def _reset(self):
+  def reset(self):
     """Reset function is called everytime after an episode ends either cause of failure or
     episode timeout. 
     No args required
@@ -239,7 +239,10 @@ class StochBulletEnv(gym.Env):
 
     if self._env_randomizer is not None:
       self._env_randomizer.randomize_env(self)
-
+    if  False:
+        self._pybullet_client.createConstraint(self.stoch.quadruped, -1, -1, -1,
+                                               self._pybullet_client.JOINT_FIXED, [0, 0, 0],
+                                               [0, 0, 0], [0, 0, 1])
     self._env_step_counter = 0
     self._last_base_position = [0, 0, 0]
     self._objectives = []
@@ -248,7 +251,7 @@ class StochBulletEnv(gym.Env):
 
     return self._noisy_observation()
 
-  def _seed(self, seed=None):
+  def seed(self, seed=None):
     self.np_random, seed = seeding.np_random(seed)
     return [seed]
 
@@ -271,7 +274,7 @@ class StochBulletEnv(gym.Env):
       action = self.stoch.ConvertFromLegModel(action)
     return action
 
-  def _step(self, action):
+  def step(self, action):
     """Step forward the simulation, given the action.
 
     Args:
@@ -295,6 +298,8 @@ class StochBulletEnv(gym.Env):
       time_to_sleep = self._action_repeat * self._time_step - time_spent
       if time_to_sleep > 0:
         time.sleep(time_to_sleep)
+        # time.sleep(1./240.)
+        pass
       base_pos = self.stoch.GetBasePosition()
       camInfo = self._pybullet_client.getDebugVisualizerCamera()
       curTargetPos = camInfo[11]
@@ -338,7 +343,7 @@ class StochBulletEnv(gym.Env):
 
     return np.array(self._noisy_observation()), reward, done, {}
 
-  def _render(self, mode="rgb_array", close=False):
+  def render(self, mode="rgb_array", close=False):
     if mode != "rgb_array":
       return np.array([])
     base_pos = self.stoch.GetBasePosition()
@@ -484,11 +489,11 @@ class StochBulletEnv(gym.Env):
                       self.stoch.GetObservationUpperBound())
     return observation
 
-  if parse_version(gym.__version__)>=parse_version('0.9.6'):
-    render = _render
-    reset = _reset
-    seed = _seed
-    step = _step
+  # if parse_version(gym.__version__)>=parse_version('0.9.6'):
+  #   render = _render
+  #   reset = _reset
+  #   seed = _seed
+  #   step = _step
 
 if(__name__ == "__main__"):
   env = StochBulletEnv(render=True)

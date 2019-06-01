@@ -4,7 +4,7 @@
 import copy
 import math
 import numpy as np
-import pybRL.envs.motor as motor
+import motor
 import os
 import time
 
@@ -146,7 +146,7 @@ class Stoch(object):
             flags=self._pybullet_client.URDF_USE_SELF_COLLISION)
       else:
         self.quadruped = self._pybullet_client.loadURDF(
-            "/home/sashank/mjrl-master/pybRL/envs/stoch_two_urdf/urdf/stoch_two_urdf.urdf", INIT_POSITION)#, flags=self._pybullet_client.URDF_USE_MATERIAL_COLORS_FROM_MTL)
+            "/home/sashank/stoch_two_urdf/urdf/stoch_two_urdf.urdf", INIT_POSITION)#, flags=self._pybullet_client.URDF_USE_MATERIAL_COLORS_FROM_MTL)
 
       self._BuildJointNameToIdDict()
       self._BuildMotorIdList()

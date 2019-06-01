@@ -229,7 +229,8 @@ def train(env, policy, normalizer, hp, parentPipes, args):
           temp_p = temp_p+1
         p = p + process_count
 
-        print('mp step has worked, p: ', p)
+        # print('mp step has worked, ', p)
+        print('total steps till now: ', total_steps)
         
     else:
       # Getting the positive rewards in the positive directions
