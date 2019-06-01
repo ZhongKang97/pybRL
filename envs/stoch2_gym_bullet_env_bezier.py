@@ -287,7 +287,7 @@ class Stoch2Env(gym.Env):
         # distance_travelled = np.clip(forward_reward, -0.1, 0.1)
 
 #         walking_velocity_reward = 10 * np.exp(-10*(0.6 - xvel)**2)
-        walking_height_reward = 0.5 * np.exp(-10*(0.23 - current_base_position[2])**2)
+        # walking_height_reward = 0.5 * np.exp(-10*(0.23 - current_base_position[2])**2)
 #         print(current_base_position[2])
 
         done, penalty = self._termination(current_base_position, current_base_orientation)
@@ -305,9 +305,9 @@ class Stoch2Env(gym.Env):
         
 #         foot_clearance_reward = 0.5 * np.exp(-10*(0.04 - (rt_mid[0] - rt_mid[2]))**2)
 #         stride_length_reward = 0.1 * np.exp(-10*(0.25 - (rt_start[1] - rt_start[3]))**2)
-        distance_travelled = np.array(current_base_position) - np.array(self._xpos_previous)
-        self._xpos_previous = current_base_position
-
+        # distance_travelled = np.array(current_base_position) - np.array(self._xpos_previous)
+        self._xpos_previous = current_base_position[0]
+        penalty = penalty + roll_penalty + yaw_penalty +pitch_penalty
 #         walking_velocity_reward = 10 * np.exp(-10*(0.6 - xvel)**2)
 #         walking_height_reward = 2 * np.exp(-2*(0.22 - zpos)**2)
         costreference_reward = 10 * np.exp(-2*(0 - cost_reference)**2)
@@ -324,7 +324,6 @@ class Stoch2Env(gym.Env):
         
         reward = distance_travelled - penalty - 0.01 * energy_spent_per_step + 0.5 * costreference_reward #+ walking_height_reward + foot_clearance_reward + stride_length_reward# + walking_velocity_reward
         # print('reward being returned in function: ', reward)
-        reward = reward[0]
         return reward, done, penalty
 
     def _apply_pd_control(self, motor_commands, motor_vel_commands):
