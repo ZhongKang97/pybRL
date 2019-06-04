@@ -146,7 +146,7 @@ class Stoch(object):
             flags=self._pybullet_client.URDF_USE_SELF_COLLISION)
       else:
         self.quadruped = self._pybullet_client.loadURDF(
-            "/home/sashank/stoch_two_urdf/urdf/stoch_two_urdf.urdf", INIT_POSITION)#, flags=self._pybullet_client.URDF_USE_MATERIAL_COLORS_FROM_MTL)
+            "/home/rbccps/pybRL/envs/stoch_two_urdf/urdf/stoch_two_urdf.urdf", INIT_POSITION)#, flags=self._pybullet_client.URDF_USE_MATERIAL_COLORS_FROM_MTL)
 
       self._BuildJointNameToIdDict()
       self._BuildMotorIdList()
@@ -387,7 +387,7 @@ class Stoch(object):
     observation.extend(self.GetMotorVelocities().tolist())
     observation.extend(self.GetMotorTorques().tolist())
     observation.extend(list(self.GetBaseOrientation()))
-    return observation[0:8] + observation[24:28]
+    return observation
 
   def ApplyAction(self, motor_commands):
     """Set the desired motor angles to the motors of the stoch.

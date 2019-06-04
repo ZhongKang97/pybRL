@@ -50,9 +50,9 @@ class StochBulletEnv(gym.Env):
 
   def __init__(self,
                urdf_root=pybullet_data.getDataPath(),
-               action_repeat=5,
+               action_repeat=1,
                distance_weight=1.0,
-               energy_weight=0.02,
+               energy_weight=0.2,
                shake_weight=0.0,
                drift_weight=0.0,
                distance_limit=float("inf"),
@@ -143,6 +143,7 @@ class StochBulletEnv(gym.Env):
     self._last_frame_time = 0.0
     print("urdf_root=" + self._urdf_root)
     self._env_randomizer = None
+    self._info = {}
 
     # PD control needs smaller time step for stability.
     if pd_control_enabled or accurate_motor_model_enabled:
@@ -340,8 +341,7 @@ class StochBulletEnv(gym.Env):
     self._env_step_counter += 1
     reward = self._reward()
     done = self._termination()
-
-    return np.array(self._noisy_observation()), reward, done, {}
+    return np.array(self._noisy_observation()), reward, done, self._info
 
   def render(self, mode="rgb_array", close=False):
     if mode != "rgb_array":
@@ -478,11 +478,13 @@ class StochBulletEnv(gym.Env):
 
   def _get_observation(self):
     self._observation = self.stoch.GetObservation()
-    return self._observation
+    self._info['angles'] = self._observation[0:8]
+    self._info['vel'] = self._observation[8:16]
+    self._info['torques'] = self._observation[16:24]
+    return self._observation[0:8] + self._observation[24:28]
 
   def _noisy_observation(self):
-    self._get_observation()
-    observation = np.array(self._observation)
+    observation = np.array(self._get_observation())
     if self._observation_noise_stdev > 0:
       observation += (np.random.normal(
           scale=self._observation_noise_stdev, size=observation.shape) *
