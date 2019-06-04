@@ -263,7 +263,7 @@ class StochBulletEnv(gym.Env):
     Converts polar coordinates to motor joint angles (radians)
 
     Returns:
-      Motor joint angles to be excuted by the robot.
+      Motor joint angles to be excuted by the robot. 
 
     """
     if self._leg_model_enabled:
@@ -272,7 +272,9 @@ class StochBulletEnv(gym.Env):
                 self._action_bound + ACTION_EPS):
           raise ValueError(
               "{}th action {} out of bounds.".format(i, action_component))
-      action = self.stoch.ConvertFromLegModel(action)
+      action, xpos, ypos = self.stoch.ConvertFromLegModel(action)
+      self._info['xpos'] = xpos
+      self._info['ypos'] = ypos
     return action
 
   def step(self, action):

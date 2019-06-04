@@ -523,7 +523,7 @@ class Stoch(object):
     Args:
       actions: The theta, phi of the leg model.
     Returns:
-      The eight desired motor angles that can be used in ApplyActions().
+      The eight desired motor angles that can be used in ApplyActions(). Also returning x and y pos of joints
     """
     motor_angle = copy.deepcopy(actions)
 
@@ -531,6 +531,8 @@ class Stoch(object):
     RL agent gives action in range [-1, 1] so scaling is required within the operational region of the leg
 
     '''
+    x_pos = []
+    y_pos = []
     for i in range(2): 
 
       r_ac = 0.16 + 0.045*(actions[2*i]+1) 
@@ -544,8 +546,10 @@ class Stoch(object):
       # offsets for the zero calibration
       motor_angle[2*i] = knee + 1.2217 
       motor_angle[2*i+1] = hip + 2.3562
+      x_pos.append(x)
+      y_pos.append(y)
       
-    return motor_angle
+    return motor_angle, x_pos, y_pos
 
   def limiter(self, X):
     if abs(X) >1 :
