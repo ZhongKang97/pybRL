@@ -60,3 +60,22 @@ def make_train_plots_ars(log = None,
     plt.title(keys[1])
     plt.savefig(save_loc+'/'+keys[1]+'.png', dpi=100)
     plt.close()
+
+def plot_traj(logger, keys_x, keys_y, titles = None,save_loc = None):
+    """
+    Function meant to plot foot trajectories but can be used for any 2 dimensional plotting
+    :param logger : Object of class DataLog present in logger.py
+    :param keys_x : List of values that contains the keys to be used in x axis of plotting
+    :param keys_y : List of values that contains the keys to be used in y axis of plotting, needs to be same size as keys_x
+    :param titles : Titles desired for each plot, needs to be same size as keys_x
+    :param save_loc : Path to the save the image, can be relative 
+    :return : Saves a bunch of figures in required path
+    """
+    for i in range(len(keys_x)):
+        plt.figure(figsize=(10,6))
+        plt.plot(logger.log[keys_x[i]], logger.log[keys_y[i]])
+        if(titles is None):
+            titles = range(len(keys_x))
+        plt.title(str(titles[i]))
+        plt.savefig(save_loc+'/'+str(titles[i])+'.png', dpi=100)
+        plt.close()
