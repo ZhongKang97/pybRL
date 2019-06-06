@@ -1,0 +1,4 @@
+learning_rate: 0.1
+noise: 0.03
+env_name: MinitaurTrottingEnv-v0
+episode_length: 1000
