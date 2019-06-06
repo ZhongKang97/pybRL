@@ -29,7 +29,7 @@ class HyperParameters():
     """
     This class is basically a struct that contains all the hyperparameters that you want to tune
     """
-    def __init__(self, nb_steps=10000, episode_length=1000, learning_rate=0.02, nb_directions=16, nb_best_directions=8, noise=0.03, seed=1, env_name='HalfCheetahBulletEnv-v0'):
+    def __init__(self, nb_steps=10000, episode_length=1000, learning_rate=0.02, nb_directions=16, nb_best_directions=8, noise=0.03, seed=1, env_name='HalfCheetahBulletEnv-v0', energy_weight = 0.2):
         self.nb_steps = nb_steps
         self.episode_length = episode_length
         self.learning_rate = learning_rate
@@ -39,6 +39,7 @@ class HyperParameters():
         self.noise = noise
         self.seed = seed
         self.env_name = env_name
+        self.energy_weight = energy_weight
     
     def to_text(self, path):
         res_str = ''
@@ -46,6 +47,8 @@ class HyperParameters():
         res_str = res_str + 'noise: ' + str(self.noise) + '\n'
         res_str = res_str + 'env_name: ' + str(self.env_name) + '\n'
         res_str = res_str + 'episode_length: ' + str(self.episode_length) + '\n'
+        res_str = res_str + 'energy weight: ' + str(self.energy_weight) + '\n'
+        res_str = res_str + 'direction ratio: '+ str(self.nb_directions/ self.nb_best_directions) + '\n'
         fileobj = open(path, 'w')
         fileobj.write(res_str)
         fileobj.close()
@@ -230,7 +233,7 @@ def train(env, policy, normalizer, hp, parentPipes, args):
         p = p + process_count
 
         # print('mp step has worked, ', p)
-        print('total steps till now: ', total_steps)
+        print('total steps till now: ', total_steps, 'Processes done: ', p)
         
     else:
       # Getting the positive rewards in the positive directions
@@ -297,11 +300,12 @@ if __name__ == "__main__":
   parser.add_argument('--noise', help='noise hyperparameter', type=float, default=0.03)
   parser.add_argument('--episode_length', help='length of each episode', type=float, default=10)
   parser.add_argument('--gait', help='type of gait you want (Only in Stoch2 normal env', type=str, default='trot')
+  parser.add_argument('--energy_weight', help='reward shaping, amount to penalise the energy', type=float, default=0.2)
   args = parser.parse_args()
  
   # #Custom environments that you want to use ----------------------------------------------------------------------------------------
   register(id='Stoch2-v0',entry_point='pybRL.envs.stoch2_gym_bullet_env_bezier:Stoch2Env')
-  register(id='Stoch2-v1',entry_point='pybRL.envs.stoch2_gym_bullet_env_normal:StochBulletEnv', kwargs = {'gait': 'trot'})
+  register(id='Stoch2-v1',entry_point='pybRL.envs.stoch2_gym_bullet_env_normal:StochBulletEnv', kwargs = {'gait': args.gait, 'energy_weight': args.energy_weight})
   # #---------------------------------------------------------------------------------------------------------------------------------
 
   hp = HyperParameters()
@@ -312,6 +316,8 @@ if __name__ == "__main__":
   hp.learning_rate = args.lr
   hp.noise = args.noise
   hp.episode_length = args.episode_length
+  hp.energy_weight = args.energy_weight
+  print(env.observation_space.sample())
   hp.nb_directions = int(env.observation_space.sample().shape[0] * env.action_space.sample().shape[0])
   hp.nb_best_directions = int(hp.nb_directions / 4)
   # print('number directions: ', hp.nb_directions)

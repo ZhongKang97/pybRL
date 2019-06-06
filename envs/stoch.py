@@ -1,10 +1,13 @@
 """This file implements the functionalities of a stoch using pybullet.
 
 """
+
+import sys, os
+sys.path.append(os.path.realpath('../..'))
 import copy
 import math
 import numpy as np
-import motor
+import pybRL.envs.motor as motor
 import os
 import time
 

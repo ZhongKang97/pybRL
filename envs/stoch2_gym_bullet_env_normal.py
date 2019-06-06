@@ -165,12 +165,11 @@ class StochBulletEnv(gym.Env):
     self.seed()
     self.reset()
 
-    #State space
-    observation_high = (
-        self.stoch.GetObservationUpperBound() + OBSERVATION_EPS)
-    observation_low = (
-        self.stoch.GetObservationLowerBound() - OBSERVATION_EPS)
-
+    #State space --- Changing to reduce the obs size
+    observation_high = self.stoch.GetObservationUpperBound() + OBSERVATION_EPS
+    observation_low =  self.stoch.GetObservationLowerBound() - OBSERVATION_EPS
+    observation_high = np.append(observation_high[0:8],observation_high[24:28])
+    observation_low = np.append(observation_low[0:8],observation_low[24:28])
     # Gait selection and correspoding attributes
 
     self.trot, self.bound, self.spine = False, False, False

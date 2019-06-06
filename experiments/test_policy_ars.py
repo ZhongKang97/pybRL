@@ -26,7 +26,7 @@ logger = DataLog()
 i = 0
 policy = np.load(path)
 print(policy)
-while i<100:
+while i<20:
     action = np.matmul(policy, state)
     state, reward, done, info = env.step(np.clip(action, -1, 1))
     i =i+1
@@ -37,4 +37,4 @@ while i<100:
 
     # time.sleep(1./30.)
 
-plotter.plot_traj(logger, ['x_leg1', 'x_leg2'], ['y_leg1', 'y_leg2'], ['Leg1 Trajectory', 'Leg2 Trajectory'], save_loc= './')
+plotter.plot_traj(logger, ['x_leg1', 'x_leg2'], ['y_leg1', 'y_leg2'], ['Leg1 Trajectory, rep:5', 'Leg2 Trajectory, rep:5'], save_loc= './')
