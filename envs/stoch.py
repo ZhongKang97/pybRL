@@ -144,13 +144,12 @@ class Stoch(object):
       
       if self._self_collision_enabled:
         self.quadruped = self._pybullet_client.loadURDF(
-            "/home/abhik/stoch_two_urdf/urdf/stoch_two_urdf.urdf",
+            os.path.realpath('../..')+'/pybRL/envs/stoch_two_urdf/urdf/stoch_two_urdf.urdf',
             INIT_POSITION,
             flags=self._pybullet_client.URDF_USE_SELF_COLLISION)
       else:
         self.quadruped = self._pybullet_client.loadURDF(
-            "/home/rbccps/pybRL/envs/stoch_two_urdf/urdf/stoch_two_urdf.urdf", INIT_POSITION)#, flags=self._pybullet_client.URDF_USE_MATERIAL_COLORS_FROM_MTL)
-
+            os.path.realpath('../..')+'/pybRL/envs/stoch_two_urdf/urdf/stoch_two_urdf.urdf', INIT_POSITION)#, flags=self._pybullet_client.URDF_USE_MATERIAL_COLORS_FROM_MTL)
       self._BuildJointNameToIdDict()
       self._BuildMotorIdList()
       self.ResetPose(add_constraint=True)
