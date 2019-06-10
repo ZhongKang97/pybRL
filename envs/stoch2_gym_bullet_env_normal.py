@@ -454,10 +454,10 @@ class StochBulletEnv(gym.Env):
     base_vel = self.stoch.GetBaseVelocity()
 
     ## higher the reward higher the speed
-    # forward_reward = current_base_position[0] - self._last_base_position[0]
+    forward_reward = current_base_position[0] - self._last_base_position[0]
 
     ## gives higher reward as reaching a particular value of velocity
-    forward_reward = self.gauss(base_vel[0], self.velocity, self.vel_sd)
+    # forward_reward = self.gauss(base_vel[0], self.velocity, self.vel_sd)
 
     drift_reward = -abs(current_base_position[1] - self._last_base_position[1])
     shake_reward = -abs(current_base_position[2] - self._last_base_position[2])
