@@ -41,7 +41,7 @@ class Normalizer():
 env = e.StochBulletEnv(render = True, gait = 'trot', energy_weight = 10.0 )
 # path = '/home/sashank/mjrl-master/pybRL/experiments/policy_MinitaurTrottingEnv-v0_20190522-110536.npy'
 # path = '/home/abhik/pybRL/experiments/Stoch2_ARS_1/iterations/best_policy.npy'
-path = os.path.realpath('../..') + '/pybRL/experiments/Stoch_Test/iterations/policy_0.npy'
+path = os.path.realpath('../..') + '/pybRL/experiments/Stoch2_ARS_wt_2/iterations/best_policy.npy'
 state = env.reset()
 nb_inputs = env.observation_space.sample().shape[0]
 normalizer = Normalizer(nb_inputs)

@@ -50,7 +50,7 @@ class StochBulletEnv(gym.Env):
 
   def __init__(self,
                urdf_root=pybullet_data.getDataPath(),
-               action_repeat=1,
+               action_repeat=5,
                distance_weight=1.0,
                energy_weight=0.2,
                shake_weight=0.0,
