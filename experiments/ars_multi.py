@@ -165,7 +165,9 @@ class Policy():
 # Exploring the policy on one specific direction and over one episode
 
 
-def explore(env, normalizer, policy, direction, delta, hp):
+def explore(env, policy, direction, delta, hp):
+  nb_inputs = env.observation_space.sample().shape[0]
+  normalizer = Normalizer(nb_inputs)
   state = env.reset()
   done = False
   num_plays = 0.
@@ -238,15 +240,12 @@ def train(env, policy, normalizer, hp, parentPipes, args):
     else:
       # Getting the positive rewards in the positive directions
       for k in range(hp.nb_directions):
-        positive_rewards[k] = explore(env, normalizer, policy, "positive", deltas[k], hp)
+        positive_rewards[k] = explore(env, policy, "positive", deltas[k], hp)
 
       # Getting the negative rewards in the negative/opposite directions
       for k in range(hp.nb_directions):
-        negative_rewards[k] = explore(env, normalizer, policy, "negative", deltas[k], hp)
+        negative_rewards[k] = explore(env, policy, "negative", deltas[k], hp)
 
-    # Gathering all the positive/negative rewards to compute the standard deviation of these rewards
-    all_rewards = np.array(positive_rewards + negative_rewards)
-    sigma_r = all_rewards.std()
     # Sorting the rollouts by the max(r_pos, r_neg) and selecting the best directions
     scores = {
         k: max(r_pos, r_neg)
@@ -254,12 +253,15 @@ def train(env, policy, normalizer, hp, parentPipes, args):
     }
     order = sorted(scores.keys(), key=lambda x: -scores[x])[:int(hp.nb_best_directions)]
     rollouts = [(positive_rewards[k], negative_rewards[k], deltas[k]) for k in order]
-
+   
+    # Gathering all the positive/negative rewards to compute the standard deviation of these rewards
+    all_rewards = np.array([x[0] for x in rollouts] + [x[1] for x in rollouts])
+    sigma_r = all_rewards.std() # Standard deviation of only rewards in the best directions is what it should be
     # Updating our policy
     policy.update(rollouts, sigma_r, args)
 
     # Printing the final reward of the policy after the update
-    reward_evaluation = explore(env, normalizer, policy, None, None, hp)
+    reward_evaluation = explore(env, policy, None, None, hp)
     logger.log_kv('steps', total_steps)
     logger.log_kv('return', reward_evaluation)
     if(reward_evaluation > best_return):
