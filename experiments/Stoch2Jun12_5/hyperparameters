@@ -5,4 +5,4 @@ episode_length: 1000.0
 energy weight: 0.5
 direction ratio: 4.0
 Normal initialization: 0
-Termination, best learning rate, reduced noise, 100 steps
+Termination, best learning rate, reduced noise, 30 steps, smaller penalty (10) for premature ending of episode 

@@ -4,3 +4,6 @@ env_name: Stoch2-v1
 episode_length: 1000.0
 energy weight: 0.2
 direction ratio: 4.0
+Final Directions:
+
+Dont put a penalty, add a discount factor, possibly reduce the terminating conditions and try@

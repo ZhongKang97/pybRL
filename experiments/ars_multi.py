@@ -94,7 +94,7 @@ def ExploreWorker(rank, childPipe, envname, args):
       num_plays = 0.
       sum_rewards = 0
       #
-      while not done and num_plays < hp.episode_length:
+      while num_plays < hp.episode_length:
         normalizer.observe(state)
         state = normalizer.normalize(state)
         action = policy.evaluate(state, delta, direction, hp)
@@ -333,7 +333,7 @@ if __name__ == "__main__":
   hp.energy_weight = args.energy_weight
   print(env.observation_space.sample())
   hp.nb_directions = int(env.observation_space.sample().shape[0] * env.action_space.sample().shape[0])
-  hp.nb_best_directions = int(hp.nb_directions / 4)
+  hp.nb_best_directions = int(hp.nb_directions / 2)
   hp.normal = args.normal
   # print('number directions: ', hp.nb_directions)
   # print('number best directions: ', hp.nb_best_directions)
