@@ -29,7 +29,7 @@ class HyperParameters():
     """
     This class is basically a struct that contains all the hyperparameters that you want to tune
     """
-    def __init__(self, normal = True,nb_steps=10000, episode_length=1000, learning_rate=0.02, nb_directions=16, nb_best_directions=8, noise=0.03, seed=1, env_name='HalfCheetahBulletEnv-v0', energy_weight = 0.2):
+    def __init__(self, normal = True, msg = '', nb_steps=10000, episode_length=1000, learning_rate=0.02, nb_directions=16, nb_best_directions=8, noise=0.03, seed=1, env_name='HalfCheetahBulletEnv-v0', energy_weight = 0.2):
         self.nb_steps = nb_steps
         self.episode_length = episode_length
         self.learning_rate = learning_rate
@@ -41,6 +41,7 @@ class HyperParameters():
         self.env_name = env_name
         self.energy_weight = energy_weight
         self.normal = normal
+        self.msg = msg
     
     def to_text(self, path):
         res_str = ''
@@ -51,6 +52,7 @@ class HyperParameters():
         res_str = res_str + 'energy weight: ' + str(self.energy_weight) + '\n'
         res_str = res_str + 'direction ratio: '+ str(self.nb_directions/ self.nb_best_directions) + '\n'
         res_str = res_str + 'Normal initialization: '+ str(self.normal) + '\n'
+        res_str = res_str + self.msg + '\n'
         fileobj = open(path, 'w')
         fileobj.write(res_str)
         fileobj.close()
@@ -310,6 +312,8 @@ if __name__ == "__main__":
   parser.add_argument('--normal', help='length of each episode', type=int, default=1)
   parser.add_argument('--gait', help='type of gait you want (Only in Stoch2 normal env', type=str, default='trot')
   parser.add_argument('--energy_weight', help='reward shaping, amount to penalise the energy', type=float, default=0.2)
+  parser.add_argument('--msg', help='msg to save in a text file', type=str, default='')
+
   args = parser.parse_args()
  
   # #Custom environments that you want to use ----------------------------------------------------------------------------------------
@@ -318,6 +322,7 @@ if __name__ == "__main__":
   # #---------------------------------------------------------------------------------------------------------------------------------
 
   hp = HyperParameters()
+  hp.msg = args.msg
   hp.env_name = args.env
   env = gym.make(hp.env_name)
   hp.seed = args.seed
