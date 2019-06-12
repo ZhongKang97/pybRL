@@ -168,8 +168,10 @@ class StochBulletEnv(gym.Env):
     #State space --- Changing to reduce the obs size
     observation_high = self.stoch.GetObservationUpperBound() + OBSERVATION_EPS
     observation_low =  self.stoch.GetObservationLowerBound() - OBSERVATION_EPS
-    observation_high = np.append(observation_high[0:8],observation_high[24:28])
-    observation_low = np.append(observation_low[0:8],observation_low[24:28])
+    # observation_high = np.append(observation_high[0:8],observation_high[24:28])
+    # observation_low = np.append(observation_low[0:8],observation_low[24:28])
+    observation_high = observation_high[24:28]
+    observation_low = observation_low[24:28]
     # Gait selection and correspoding attributes
 
     self.trot, self.bound, self.spine = False, False, False
@@ -482,7 +484,8 @@ class StochBulletEnv(gym.Env):
     self._info['angles'] = self._observation[0:8]
     self._info['vel'] = self._observation[8:16]
     self._info['torques'] = self._observation[16:24]
-    return self._observation[0:8] + self._observation[24:28]
+    #Only uses orientation of the robot
+    return self._observation[24:28]
 
   def _noisy_observation(self):
     observation = np.array(self._get_observation())

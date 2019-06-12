@@ -29,7 +29,7 @@ class HyperParameters():
     """
     This class is basically a struct that contains all the hyperparameters that you want to tune
     """
-    def __init__(self, nb_steps=10000, episode_length=1000, learning_rate=0.02, nb_directions=16, nb_best_directions=8, noise=0.03, seed=1, env_name='HalfCheetahBulletEnv-v0', energy_weight = 0.2):
+    def __init__(self, normal = True,nb_steps=10000, episode_length=1000, learning_rate=0.02, nb_directions=16, nb_best_directions=8, noise=0.03, seed=1, env_name='HalfCheetahBulletEnv-v0', energy_weight = 0.2):
         self.nb_steps = nb_steps
         self.episode_length = episode_length
         self.learning_rate = learning_rate
@@ -40,6 +40,7 @@ class HyperParameters():
         self.seed = seed
         self.env_name = env_name
         self.energy_weight = energy_weight
+        self.normal = normal
     
     def to_text(self, path):
         res_str = ''
@@ -49,6 +50,7 @@ class HyperParameters():
         res_str = res_str + 'episode_length: ' + str(self.episode_length) + '\n'
         res_str = res_str + 'energy weight: ' + str(self.energy_weight) + '\n'
         res_str = res_str + 'direction ratio: '+ str(self.nb_directions/ self.nb_best_directions) + '\n'
+        res_str = res_str + 'Normal initialization: '+ str(self.normal) + '\n'
         fileobj = open(path, 'w')
         fileobj.write(res_str)
         fileobj.close()
@@ -89,7 +91,8 @@ def ExploreWorker(rank, childPipe, envname, args):
       done = False
       num_plays = 0.
       sum_rewards = 0
-      while not done and num_plays < hp.episode_length:
+      #
+      while num_plays < hp.episode_length:
         normalizer.observe(state)
         state = normalizer.normalize(state)
         action = policy.evaluate(state, delta, direction, hp)
@@ -135,11 +138,14 @@ class Normalizer():
 
 class Policy():
 
-  def __init__(self, input_size, output_size, env_name, args):
+  def __init__(self, input_size, output_size, env_name, normal):
     try:
       self.theta = np.load(args.policy)
     except:
-      self.theta = np.zeros((output_size, input_size))
+      if(normal):
+        self.theta = np.random.randn(output_size, input_size)
+      else:
+        self.theta = np.zeros((output_size, input_size))
     self.env_name = env_name
     print("Starting policy theta=", self.theta)
 
@@ -156,8 +162,8 @@ class Policy():
 
   def update(self, rollouts, sigma_r, args):
     step = np.zeros(self.theta.shape)
-    for r_pos, r_neg, d in rollouts:
-      step += (r_pos - r_neg) * d
+    for r_pos, r_neg, direction in rollouts:
+      step += (r_pos - r_neg) * direction 
     self.theta += hp.learning_rate / (hp.nb_best_directions * sigma_r) * step
     timestr = time.strftime("%Y%m%d-%H%M%S")
 
@@ -290,7 +296,7 @@ if __name__ == "__main__":
   parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
   parser.add_argument(
       '--env', help='Gym environment name', type=str, default='MinitaurTrottingEnv-v0')
-  parser.add_argument('--seed', help='RNG seed', type=int, default=1)
+  parser.add_argument('--seed', help='RNG seed', type=int, default=1234123)
   parser.add_argument('--render', help='OpenGL Visualizer', type=int, default=0)
   parser.add_argument('--movie', help='rgb_array gym movie', type=int, default=0)
   parser.add_argument('--steps', help='Number of steps', type=int, default=10000)
@@ -301,6 +307,7 @@ if __name__ == "__main__":
   parser.add_argument('--lr', help='learning rate', type=float, default=0.2)
   parser.add_argument('--noise', help='noise hyperparameter', type=float, default=0.03)
   parser.add_argument('--episode_length', help='length of each episode', type=float, default=10)
+  parser.add_argument('--normal', help='length of each episode', type=int, default=1)
   parser.add_argument('--gait', help='type of gait you want (Only in Stoch2 normal env', type=str, default='trot')
   parser.add_argument('--energy_weight', help='reward shaping, amount to penalise the energy', type=float, default=0.2)
   args = parser.parse_args()
@@ -322,13 +329,14 @@ if __name__ == "__main__":
   print(env.observation_space.sample())
   hp.nb_directions = int(env.observation_space.sample().shape[0] * env.action_space.sample().shape[0])
   hp.nb_best_directions = int(hp.nb_directions / 4)
+  hp.normal = args.normal
   # print('number directions: ', hp.nb_directions)
   # print('number best directions: ', hp.nb_best_directions)
   # exit()
   # print(hp.nb_best_directions)
   print("seed = ", hp.seed)
   np.random.seed(hp.seed)
-  max_processes = 6
+  max_processes = 10
 
   parentPipes = None
   if args.mp:
@@ -351,7 +359,8 @@ if __name__ == "__main__":
   # env = stoch2_gym_env.StochBulletEnv(render = False, gait = 'trot')
   nb_inputs = env.observation_space.sample().shape[0]
   nb_outputs = env.action_space.sample().shape[0]
-  policy = Policy(nb_inputs, nb_outputs, hp.env_name, args)
+  print('hp.normal: ', hp.normal)
+  policy = Policy(nb_inputs, nb_outputs, hp.env_name, hp.normal)
   normalizer = Normalizer(nb_inputs)
 
   print("start training")
