@@ -344,8 +344,6 @@ class StochBulletEnv(gym.Env):
     self._env_step_counter += 1
     reward = self._reward()
     done = self._termination()
-    if(done):
-      reward = reward - 10
     return np.array(self._noisy_observation()), reward, done, self._info
 
   def render(self, mode="rgb_array", close=False):
