@@ -1,0 +1,8 @@
+learning_rate: 0.08
+noise: 0.5
+env_name: Stoch2-v1
+episode_length: 1000.0
+energy weight: 0.5
+direction ratio: 4.0
+Normal initialization: 0
+Termination, lower learning rate, normal noise because it barely moved in previous case, 50 steps, small penalty for ending of episode 

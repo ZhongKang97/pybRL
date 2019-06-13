@@ -1,0 +1,8 @@
+learning_rate: 0.2
+noise: 0.5
+env_name: Stoch2-v1
+episode_length: 1000.0
+energy weight: 0.5
+direction ratio: 4.0
+Normal initialization: 0
+No episode termination in this training

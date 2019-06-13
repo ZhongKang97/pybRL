@@ -344,6 +344,8 @@ class StochBulletEnv(gym.Env):
     self._env_step_counter += 1
     reward = self._reward()
     done = self._termination()
+    if(done):
+      reward = reward - 10
     return np.array(self._noisy_observation()), reward, done, self._info
 
   def render(self, mode="rgb_array", close=False):
@@ -484,6 +486,10 @@ class StochBulletEnv(gym.Env):
     self._info['angles'] = self._observation[0:8]
     self._info['vel'] = self._observation[8:16]
     self._info['torques'] = self._observation[16:24]
+<<<<<<< HEAD
+=======
+    #Only uses orientation of the robot
+>>>>>>> 9267d727450aec96853d89a79cd91b33bd64c122
     return self._observation[24:28]
 
   def _noisy_observation(self):
