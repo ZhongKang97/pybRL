@@ -1,6 +1,0 @@
-learning_rate: 0.02
-noise: 0.05
-env_name: Stoch2-v1
-episode_length: 1000.0
-energy weight: 0.02
-direction ratio: 4.0

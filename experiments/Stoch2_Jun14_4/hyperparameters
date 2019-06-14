@@ -1,0 +1,8 @@
+learning_rate: 0.2
+noise: 0.03
+env_name: Stoch2-v1
+episode_length: 1000.0
+energy weight: 0.005
+direction ratio: 2.0
+Normal initialization: 0
+Using the energy weight same as that of minitaur, in fact all hyperparameters is same as minitaur, expect a gliding gait
