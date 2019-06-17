@@ -141,7 +141,7 @@ class Normalizer():
 
 class Policy():
 
-  def __init__(self, input_size, output_size, env_name, normal):
+  def __init__(self, input_size, output_size, env_name, normal, args):
     try:
       self.theta = np.load(args.policy)
     except:
@@ -315,12 +315,18 @@ if __name__ == "__main__":
   parser.add_argument('--energy_weight', help='reward shaping, amount to penalise the energy', type=float, default=0.2)
   parser.add_argument('--msg', help='msg to save in a text file', type=str, default='')
   parser.add_argument('--forward_reward_cap', help='Forward reward cap used in training', type=float, default=10000)
+  parser.add_argument('--distance_weight', help='The weight to be given to distance moved by robot', type=float, default=1.0)
+
 
   args = parser.parse_args()
  
   # #Custom environments that you want to use ----------------------------------------------------------------------------------------
   register(id='Stoch2-v0',entry_point='pybRL.envs.stoch2_gym_bullet_env_bezier:Stoch2Env')
-  register(id='Stoch2-v1',entry_point='pybRL.envs.stoch2_gym_bullet_env_normal:StochBulletEnv', kwargs = {'gait': args.gait, 'energy_weight': args.energy_weight, 'forward_reward_cap': args.forward_reward_cap})
+  register(id='Stoch2-v1',entry_point='pybRL.envs.stoch2_gym_bullet_env_normal:StochBulletEnv', 
+  kwargs = {'gait': args.gait, 
+  'energy_weight': args.energy_weight, 
+  'forward_reward_cap': args.forward_reward_cap, 
+  'distance_weight': args.distance_weight})
   # #---------------------------------------------------------------------------------------------------------------------------------
 
   hp = HyperParameters()
@@ -367,8 +373,7 @@ if __name__ == "__main__":
   # env = stoch2_gym_env.StochBulletEnv(render = False, gait = 'trot')
   nb_inputs = env.observation_space.sample().shape[0]
   nb_outputs = env.action_space.sample().shape[0]
-  print('hp.normal: ', hp.normal)
-  policy = Policy(nb_inputs, nb_outputs, hp.env_name, hp.normal)
+  policy = Policy(nb_inputs, nb_outputs, hp.env_name, hp.normal, args)
   normalizer = Normalizer(nb_inputs)
 
   print("start training")

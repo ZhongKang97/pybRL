@@ -1,9 +1,9 @@
-learning_rate: 0.2
+learning_rate: 0.09
 noise: 0.03
-env_name: Stoch2-v1
-episode_length: 1000.0
-energy weight: 0.005
+env_name: Stoch2-v0
+episode_length: 10.0
+energy weight: 0.05
 direction ratio: 2.0
 Normal initialization: 0
-Forward reward cap: 5.0
-Using the energy weight same as that of minitaur, in fact all hyperparameters is same as minitaur, expect a gliding gait
+Forward reward cap: 10000
+
