@@ -126,7 +126,7 @@ class Stoch2Env(gym.Env):
         self._pybullet_client.setGravity(0, 0, -9.8)
         
         #Change this to suit your path
-        model_path = '/home/sashank/mjrl-master/pybRL/envs/stoch2/stoch_two_rigid/urdf/stoch_two_urdf.urdf'
+        model_path = os.path.realpath('../..')+'/pybRL/envs/stoch_two_urdf/urdf/stoch_two_urdf.urdf'
         self.stoch2 = self._pybullet_client.loadURDF(model_path, INIT_POSITION)
         
         self._joint_name_to_id, self._motor_id_list = self.BuildMotorIdList()
