@@ -29,11 +29,7 @@ class HyperParameters():
     """
     This class is basically a struct that contains all the hyperparameters that you want to tune
     """
-<<<<<<< HEAD
-    def __init__(self,msg = '', nb_steps=10000, episode_length=1000, learning_rate=0.02, nb_directions=16, nb_best_directions=8, noise=0.03, seed=1, env_name='HalfCheetahBulletEnv-v0', energy_weight = 0.2):
-=======
     def __init__(self, normal = True, msg = '', nb_steps=10000, episode_length=1000, learning_rate=0.02, nb_directions=16, nb_best_directions=8, noise=0.03, seed=1, env_name='HalfCheetahBulletEnv-v0', energy_weight = 0.2):
->>>>>>> 9267d727450aec96853d89a79cd91b33bd64c122
         self.nb_steps = nb_steps
         self.episode_length = episode_length
         self.learning_rate = learning_rate
@@ -44,10 +40,7 @@ class HyperParameters():
         self.seed = seed
         self.env_name = env_name
         self.energy_weight = energy_weight
-<<<<<<< HEAD
-=======
         self.normal = normal
->>>>>>> 9267d727450aec96853d89a79cd91b33bd64c122
         self.msg = msg
     
     def to_text(self, path):
@@ -58,10 +51,7 @@ class HyperParameters():
         res_str = res_str + 'episode_length: ' + str(self.episode_length) + '\n'
         res_str = res_str + 'energy weight: ' + str(self.energy_weight) + '\n'
         res_str = res_str + 'direction ratio: '+ str(self.nb_directions/ self.nb_best_directions) + '\n'
-<<<<<<< HEAD
-=======
         res_str = res_str + 'Normal initialization: '+ str(self.normal) + '\n'
->>>>>>> 9267d727450aec96853d89a79cd91b33bd64c122
         res_str = res_str + self.msg + '\n'
         fileobj = open(path, 'w')
         fileobj.write(res_str)
@@ -322,11 +312,7 @@ if __name__ == "__main__":
   parser.add_argument('--normal', help='length of each episode', type=int, default=1)
   parser.add_argument('--gait', help='type of gait you want (Only in Stoch2 normal env', type=str, default='trot')
   parser.add_argument('--energy_weight', help='reward shaping, amount to penalise the energy', type=float, default=0.2)
-<<<<<<< HEAD
-  parser.add_argument('--msg', help='Any message you want pasted when starting training', type=str, default='')
-=======
   parser.add_argument('--msg', help='msg to save in a text file', type=str, default='')
->>>>>>> 9267d727450aec96853d89a79cd91b33bd64c122
 
   args = parser.parse_args()
  
@@ -356,7 +342,7 @@ if __name__ == "__main__":
   # print(hp.nb_best_directions)
   print("seed = ", hp.seed)
   np.random.seed(hp.seed)
-  max_processes = 10
+  max_processes = 6
 
   parentPipes = None
   if args.mp:
