@@ -156,12 +156,25 @@ class Policy():
 
   def evaluate(self, input, delta, direction, hp):
     if direction is None:
-      return np.clip(self.theta.dot(input), -1.0, 1.0)
+      new_pol = self.theta 
+      new_pol = new_pol.dot(input)
+      new_pol = np.reshape(new_pol, (int(new_pol.shape[0]/2), 2))
+      action = [np.random.normal(loc = new_pol[x,0], scale = abs(new_pol[x,1])) for x in range(new_pol.shape[0])]
+      action = np.clip(action, 1 ,-1)
     elif direction == "positive":
-      return np.clip((self.theta + hp.noise * delta).dot(input), -1.0, 1.0)
-    else:
-      return np.clip((self.theta - hp.noise * delta).dot(input), -1.0, 1.0)
+      new_pol = self.theta + hp.noise * delta
+      new_pol = new_pol.dot(input)
+      new_pol = np.reshape(new_pol, (int(new_pol.shape[0]/2), 2))
+      action = [np.random.normal(loc = new_pol[x,0], scale = abs(new_pol[x,1])) for x in range(new_pol.shape[0])]
+      action = np.clip(action, 1 ,-1)
 
+    else:
+      new_pol = self.theta - hp.noise * delta
+      new_pol = new_pol.dot(input)
+      new_pol = np.reshape(new_pol, (int(new_pol.shape[0]/2), 2))
+      action = [np.random.normal(loc = new_pol[x,0], scale = abs(new_pol[x,1])) for x in range(new_pol.shape[0])]
+      action = np.clip(action, 1 ,-1)
+    return action
   def sample_deltas(self):
     return [np.random.randn(*self.theta.shape) for _ in range(hp.nb_directions)]
 
@@ -174,8 +187,6 @@ class Policy():
 
 
 # Exploring the policy on one specific direction and over one episode
-
-
 def explore(env, policy, direction, delta, hp):
   nb_inputs = env.observation_space.sample().shape[0]
   normalizer = Normalizer(nb_inputs)
@@ -344,8 +355,7 @@ if __name__ == "__main__":
   hp.energy_weight = args.energy_weight
   hp.forward_reward_cap = args.forward_reward_cap
   print(env.observation_space.sample())
-  hp.nb_directions = int(env.observation_space.sample().shape[0] * env.action_space.sample().shape[0])
-  hp.nb_best_directions = int(hp.nb_directions / 2)
+  
   hp.normal = args.normal
   # print('number directions: ', hp.nb_directions)
   # print('number best directions: ', hp.nb_best_directions)
@@ -377,6 +387,8 @@ if __name__ == "__main__":
   nb_inputs = env.observation_space.sample().shape[0]
   nb_outputs = env.action_space.sample().shape[0] * 2
   policy = Policy(nb_inputs, nb_outputs, hp.env_name, hp.normal, args)
+  hp.nb_directions = int(policy.theta.shape[0] * policy.theta.shape[1])
+  hp.nb_best_directions = int(hp.nb_directions / 2)
   normalizer = Normalizer(nb_inputs)
 
   print("start training")
@@ -392,11 +404,10 @@ if __name__ == "__main__":
   # --------------------------------------------------------------------------------
   # STOCH2 Test
   # env = sv.StochBulletEnv(render = True, gait = 'trot')
-  # env = gym.make('Stoch2-v1')
   # hp = HyperParameters()
   # nb_inputs = env.observation_space.shape[0]
-  # nb_outputs = env.action_space.shape[0]
-  # policy = Policy(nb_inputs, nb_outputs, hp.env_name, None)
+  # nb_outputs = env.action_space.shape[0] * 2
+  # policy = Policy(nb_inputs, nb_outputs, hp.env_name, 0, args)
   # normalizer = Normalizer(nb_inputs)
 
   # deltas = policy.sample_deltas()
@@ -405,17 +416,12 @@ if __name__ == "__main__":
   # hp.noise = 0.2
   # sum_rewards = 0
   # while i <1000:
-  #   normalizer.observe(state)
-  #   # print('state before: ', state)
-  #   state = normalizer.normalize(state)
-  #   # print('state after: ', state)
   #   action = policy.evaluate(state, deltas[0], 'positive', hp)
-  #   # print(action)
   #   state, reward, done ,info = env.step(np.clip(action, -1, 1))
   #   sum_rewards = sum_rewards + reward
-  #   if(done):
-  #     print('terminated')
-  #     break
+  #   # if(done):
+  #   #   print('terminated')
+  #   #   break
   #   i = i + 1
-  
+  #   print('action: ', action)
   # print('total reward: ', sum_rewards)
