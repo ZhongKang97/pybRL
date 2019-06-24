@@ -459,15 +459,9 @@ class StochBulletEnv(gym.Env):
 
     ## higher the reward higher the speed
     forward_reward = current_base_position[0] - self._last_base_position[0]
-<<<<<<< HEAD
-    height_reward = current_base_position[3] - self._last_base_position[3]
-    total_dist = forward_reward**2 + height_reward**2
-
-=======
     forward_reward = min(forward_reward, self._forward_reward_cap)
     if(forward_reward > 1.8):
       print('forward_reward: ', forward_reward)
->>>>>>> 50c0d8691f3e8c414de7e0235b0b0e30a326f8db
     ## gives higher reward as reaching a particular value of velocity
     # forward_reward = self.gauss(base_vel[0], self.velocity, self.vel_sd)
 

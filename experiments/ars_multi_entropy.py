@@ -1,3 +1,5 @@
+# This version has a fixed standard deviation for each action, Does fixed standard deviation make sense, not really, so probably this one has a varying standard deviation
+
 import sys, os
 sys.path.append(os.path.realpath('../..'))
 import inspect
@@ -351,7 +353,7 @@ if __name__ == "__main__":
   # print(hp.nb_best_directions)
   print("seed = ", hp.seed)
   np.random.seed(hp.seed)
-  max_processes = 5
+  max_processes = 6
 
   parentPipes = None
   if args.mp:
@@ -373,7 +375,7 @@ if __name__ == "__main__":
 
   # env = stoch2_gym_env.StochBulletEnv(render = False, gait = 'trot')
   nb_inputs = env.observation_space.sample().shape[0]
-  nb_outputs = env.action_space.sample().shape[0]
+  nb_outputs = env.action_space.sample().shape[0] * 2
   policy = Policy(nb_inputs, nb_outputs, hp.env_name, hp.normal, args)
   normalizer = Normalizer(nb_inputs)
 
