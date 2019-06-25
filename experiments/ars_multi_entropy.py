@@ -31,7 +31,7 @@ class HyperParameters():
     """
     This class is basically a struct that contains all the hyperparameters that you want to tune
     """
-    def __init__(self,forward_reward_cap = 1, normal = True, msg = '', nb_steps=10000, episode_length=1000, learning_rate=0.02, nb_directions=16, nb_best_directions=8, noise=0.03, seed=1, env_name='HalfCheetahBulletEnv-v0', energy_weight = 0.2):
+    def __init__(self,temperature = 1, forward_reward_cap = 1, normal = True, msg = '', nb_steps=10000, episode_length=1000, learning_rate=0.02, nb_directions=16, nb_best_directions=8, noise=0.03, seed=1, env_name='HalfCheetahBulletEnv-v0', energy_weight = 0.2):
         self.nb_steps = nb_steps
         self.episode_length = episode_length
         self.learning_rate = learning_rate
@@ -45,6 +45,7 @@ class HyperParameters():
         self.normal = normal
         self.msg = msg
         self.forward_reward_cap = forward_reward_cap
+        self.temperature = temperature
     
     def to_text(self, path):
         res_str = ''
@@ -97,15 +98,20 @@ def ExploreWorker(rank, childPipe, envname, args):
       done = False
       num_plays = 0.
       sum_rewards = 0
+      total_entropy = 0
       while num_plays < hp.episode_length:
         # normalizer.observe(state)
         # state = normalizer.normalize(state)
-        action = policy.evaluate(state, delta, direction, hp)
+        action, probs = policy.evaluate(state, delta, direction, hp)
+        prob_of_action = np.prod(probs)
+        entropy_of_action = -1 * np.log(prob_of_action)
+        total_entropy = total_entropy + entropy_of_action
         state, reward, done, _ = env.step(action)
         # reward = max(min(reward, 1), -1)
         sum_rewards += reward
         num_plays += 1
       # print('rewards: ',sum_rewards)
+      sum_rewards = sum_rewards - hp.temperature * total_entropy
       childPipe.send([sum_rewards, num_plays])
       continue
     if message == _CLOSE:
@@ -157,28 +163,26 @@ class Policy():
   def evaluate(self, input, delta, direction, hp):
     if direction is None:
       new_pol = self.theta 
-      new_pol = new_pol.dot(input)
-      new_pol = np.reshape(new_pol, (int(new_pol.shape[0]/2), 2))
-      new_pol[:, 0] = np.tanh(new_pol[:,0])
-      new_pol[:, 1] = 1/(1 + np.exp(-1 * new_pol[:,1]))
-      action = [np.random.normal(loc = new_pol[x,0], scale = np.clip(new_pol[x,1], 0, 1)) for x in range(new_pol.shape[0])]
     elif direction == "positive":
       new_pol = self.theta + hp.noise * delta
-      new_pol = new_pol.dot(input)
-      new_pol = np.reshape(new_pol, (int(new_pol.shape[0]/2), 2))
-      new_pol[:, 0] = np.tanh(new_pol[:,0])
-      new_pol[:, 1] = 1/(1 + np.exp(-1 * new_pol[:,1]))
-      action = [np.random.normal(loc = new_pol[x,0], scale = np.clip(new_pol[x,1], 0, 1)) for x in range(new_pol.shape[0])]
-
     else:
       new_pol = self.theta - hp.noise * delta
-      new_pol = new_pol.dot(input)
-      new_pol = np.reshape(new_pol, (int(new_pol.shape[0]/2), 2))
-      new_pol[:, 0] = np.tanh(new_pol[:,0])
-      new_pol[:, 1] = 1/(1 + np.exp(-1 * new_pol[:,1]))
-      action = [np.random.normal(loc = new_pol[x,0], scale = np.clip(new_pol[x,1],0,1)) for x in range(new_pol.shape[0])]
+    new_pol = new_pol.dot(input)
+    new_pol = np.reshape(new_pol, (int(new_pol.shape[0]/2), 2))
+    new_pol[:, 0] = np.tanh(new_pol[:,0])
+    new_pol[:, 1] = 1/(1 + np.exp(-1 * new_pol[:,1]))
+    action = [np.random.normal(loc = new_pol[x,0], scale = np.clip(new_pol[x,1], 0, 1)) for x in range(new_pol.shape[0])]
+    means = new_pol[:,0]
+    std_devs = new_pol[:, 1]
+    num = action - means
+    num = np.square(num)
+    num = -1 * np.divide(num, 2* np.square(std_devs))
+    num = np.exp(num)
+    den = np.sqrt(2 * np.pi * np.square(std_devs))
+    # probs = np.divide(np.exp(-1*np.divide(np.square(action -  means), 2 * np.square(std_devs))), np.sqrt(2 * np.pi * np.square(std_devs)))
+    probs = np.divide(num, den)
     action = np.clip(action, 1, -1)
-    return action
+    return action, probs
   def sample_deltas(self):
     return [np.random.randn(*self.theta.shape) for _ in range(hp.nb_directions)]
 
@@ -201,7 +205,7 @@ def explore(env, policy, direction, delta, hp):
   while num_plays < hp.episode_length:
     # normalizer.observe(state)
     # state = normalizer.normalize(state)
-    action = policy.evaluate(state, delta, direction, hp)
+    action, probs = policy.evaluate(state, delta, direction, hp)
     state, reward, done, _ = env.step(action)
     # reward = max(min(reward, 1), -1)
     sum_rewards += reward
@@ -312,7 +316,7 @@ def mkdir(base, name):
 
 
 if __name__ == "__main__":  
-  # mp.freeze_support()
+  mp.freeze_support()
   parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
   parser.add_argument(
       '--env', help='Gym environment name', type=str, default='MinitaurTrottingEnv-v0')
@@ -411,6 +415,7 @@ if __name__ == "__main__":
   # hp = HyperParameters()
   # nb_inputs = env.observation_space.shape[0]
   # nb_outputs = env.action_space.shape[0] * 2
+  # args = 0
   # policy = Policy(nb_inputs, nb_outputs, hp.env_name, 0, args)
   # normalizer = Normalizer(nb_inputs)
 
@@ -420,12 +425,12 @@ if __name__ == "__main__":
   # hp.noise = 0.2
   # sum_rewards = 0
   # while i <1000:
-  #   action = policy.evaluate(state, deltas[0], 'positive', hp)
+  #   action, probs = policy.evaluate(state, deltas[0], 'positive', hp)
   #   state, reward, done ,info = env.step(np.clip(action, -1, 1))
   #   sum_rewards = sum_rewards + reward
   #   # if(done):
   #   #   print('terminated')
   #   #   break
   #   i = i + 1
-  #   print('action: ', action)
+  #   print('action: ', action, 'probs: ', probs)
   # print('total reward: ', sum_rewards)
