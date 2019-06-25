@@ -159,21 +159,25 @@ class Policy():
       new_pol = self.theta 
       new_pol = new_pol.dot(input)
       new_pol = np.reshape(new_pol, (int(new_pol.shape[0]/2), 2))
-      action = [np.random.normal(loc = new_pol[x,0], scale = abs(new_pol[x,1])) for x in range(new_pol.shape[0])]
-      action = np.clip(action, 1 ,-1)
+      new_pol[:, 0] = np.tanh(new_pol[:,0])
+      new_pol[:, 1] = 1/(1 + np.exp(-1 * new_pol[:,1]))
+      action = [np.random.normal(loc = new_pol[x,0], scale = np.clip(new_pol[x,1], 0, 1)) for x in range(new_pol.shape[0])]
     elif direction == "positive":
       new_pol = self.theta + hp.noise * delta
       new_pol = new_pol.dot(input)
       new_pol = np.reshape(new_pol, (int(new_pol.shape[0]/2), 2))
-      action = [np.random.normal(loc = new_pol[x,0], scale = abs(new_pol[x,1])) for x in range(new_pol.shape[0])]
-      action = np.clip(action, 1 ,-1)
+      new_pol[:, 0] = np.tanh(new_pol[:,0])
+      new_pol[:, 1] = 1/(1 + np.exp(-1 * new_pol[:,1]))
+      action = [np.random.normal(loc = new_pol[x,0], scale = np.clip(new_pol[x,1], 0, 1)) for x in range(new_pol.shape[0])]
 
     else:
       new_pol = self.theta - hp.noise * delta
       new_pol = new_pol.dot(input)
       new_pol = np.reshape(new_pol, (int(new_pol.shape[0]/2), 2))
-      action = [np.random.normal(loc = new_pol[x,0], scale = abs(new_pol[x,1])) for x in range(new_pol.shape[0])]
-      action = np.clip(action, 1 ,-1)
+      new_pol[:, 0] = np.tanh(new_pol[:,0])
+      new_pol[:, 1] = 1/(1 + np.exp(-1 * new_pol[:,1]))
+      action = [np.random.normal(loc = new_pol[x,0], scale = np.clip(new_pol[x,1],0,1)) for x in range(new_pol.shape[0])]
+    action = np.clip(action, 1, -1)
     return action
   def sample_deltas(self):
     return [np.random.randn(*self.theta.shape) for _ in range(hp.nb_directions)]
