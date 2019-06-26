@@ -331,12 +331,13 @@ if __name__ == "__main__":
   parser.add_argument('--lr', help='learning rate', type=float, default=0.2)
   parser.add_argument('--noise', help='noise hyperparameter', type=float, default=0.03)
   parser.add_argument('--episode_length', help='length of each episode', type=float, default=10)
-  parser.add_argument('--normal', help='length of each episode', type=int, default=1)
+  parser.add_argument('--normal', help='length of each episode', type=int, default=0)
   parser.add_argument('--gait', help='type of gait you want (Only in Stoch2 normal env', type=str, default='trot')
   parser.add_argument('--energy_weight', help='reward shaping, amount to penalise the energy', type=float, default=0.2)
   parser.add_argument('--msg', help='msg to save in a text file', type=str, default='')
   parser.add_argument('--forward_reward_cap', help='Forward reward cap used in training', type=float, default=10000)
   parser.add_argument('--distance_weight', help='The weight to be given to distance moved by robot', type=float, default=1.0)
+  parser.add_argument('--temperature', help='The weight given to the entropy of an action', type=float, default=1.0)
 
 
   args = parser.parse_args()
@@ -362,6 +363,7 @@ if __name__ == "__main__":
   hp.episode_length = args.episode_length
   hp.energy_weight = args.energy_weight
   hp.forward_reward_cap = args.forward_reward_cap
+  hp.temperature = args.temperature
   print(env.observation_space.sample())
   
   hp.normal = args.normal
