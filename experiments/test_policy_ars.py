@@ -12,6 +12,8 @@ import pybullet_envs
 import pybullet_envs.bullet.minitaur_gym_env as e
 import pybullet_envs.minitaur.envs.minitaur_trotting_env as e
 import pybRL.envs.stoch2_gym_bullet_env_normal as e
+import pybRL.envs.stoch2_gym_bullet_env_bezier as e2
+
 import pybullet as p
 import numpy as np
 import time
@@ -38,10 +40,12 @@ class Normalizer():
 
 # p.connect(p.GUI)
 # env = e.MinitaurTrottingEnv(render=True)
-env = e.StochBulletEnv(render = True, gait = 'trot' )
+# env = e.StochBulletEnv(render = True, gait = 'trot' )
+env = e2.Stoch2Env(render = True)
+
 # path = '/home/sashank/mjrl-master/pybRL/experiments/policy_MinitaurTrottingEnv-v0_20190522-110536.npy'
 # path = '/home/abhik/pybRL/experiments/Stoch2_ARS_1/iterations/best_policy.npy'
-path = os.path.realpath('../..') + '/pybRL/experiments/Stoch2_Jun13_7/iterations/best_policy.npy'
+path = os.path.realpath('../..') + '/pybRL/experiments/STOCH/Stoch_Bezier_ARS_1/iterations/policy_4.npy'
 state = env.reset()
 nb_inputs = env.observation_space.sample().shape[0]
 normalizer = Normalizer(nb_inputs)
@@ -55,10 +59,10 @@ while i<1000:
     state, reward, done, info = env.step(action)
     total_reward = total_reward + reward
     i =i+1
-    logger.log_kv('x_leg1', info['xpos'][0])
-    logger.log_kv('x_leg2', info['xpos'][1])
-    logger.log_kv('y_leg1', info['ypos'][0])
-    logger.log_kv('y_leg2', info['ypos'][1])
+    # logger.log_kv('x_leg1', info['xpos'][0])
+    # logger.log_kv('x_leg2', info['xpos'][1])
+    # logger.log_kv('y_leg1', info['ypos'][0])
+    # logger.log_kv('y_leg2', info['ypos'][1])
 
     # time.sleep(1./30.)
 print(total_reward)
