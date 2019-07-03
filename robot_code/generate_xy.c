@@ -18,18 +18,22 @@ int main()
 
     //For action_to_xy
     double xy[4] = {0};
+    double x_leg1_coords[1000];
+    double x_leg2_coords[1000];
+    double y_leg1_coords[1000];
+    double y_leg2_coords[1000];
     double yx[4] = {0};
     int xy_list[4] = {1,0,3,2};
-    double dxdy[4] = {0};
-    double dydx[4] = {0};
     double weight_ac[16] = {0};
     double phi[16] = {0};
-    double dphidt[16] = {0};
     double RT_OFFSET[2] = {0.20, 0.0};
     double RT_SCALINGFACTOR[2] = {0.045/4, 0.045/3};
     const double omega = 2*PI*2;
+
+    int count  =0;
     for (theta = 0; theta < 2*PI; theta = theta + 0.001*2*PI)
     {
+
         if(theta < PI)
         {
             tau = theta/PI;
@@ -64,10 +68,7 @@ int main()
         // Bezier Polynomial function start
         for(int i=0; i<16; i++)
         {
-            dphidt[4*i + 0] = -3 * (1- tau) * (1-tau);
-            dphidt[4*i + 1] = (1 - tau)*(1-tau) - 2*tau*(1-tau);
-            dphidt[4*i + 2] = -tau*tau + 2*tau*(1-tau);
-            dphidt[4*i + 3] = 3*tau*tau;
+            
 
             phi[4*i + 0] = (1-tau)*(1-tau)*(1-tau);
             phi[4*i + 1] = tau*(1-tau)*(1-tau);
@@ -82,26 +83,26 @@ int main()
             for(int j =0; j<4; j++)
             {
                 yx[i] += weight_ac[4*i + j]*phi[4*i+j];
-                dydx[i] += weight_ac[4*i + j]*dphidt[4*i+j];
             }
-            dydx[i] = (omega/PI) * dydx[i] * RT_SCALINGFACTOR[i%2];
             yx[i] = yx[i]*RT_SCALINGFACTOR[i %2 ] + RT_OFFSET[i%2];
             
         }
         yx[0] = -1*yx[0];
         yx[2] = -1*yx[2];
-        dydx[0] = -1*dydx[0];
-        dydx[2] = -1*dydx[2];
         for (int i =0; i<4; i++)
         {
             xy[i] = yx[xy_list[i]];
-            dxdy[i] = dydx[xy_list[i]];
         }
+        x_leg1_coords[count] = xy[0];
+        x_leg2_coords[count] = xy[2];
 
-
-        
-
-
-
+        y_leg1_coords[count] = xy[1];
+        y_leg2_coords[count] = xy[3];
+        count++;
     }
+    for(int i=0; i<1000; i++)
+    {
+        printf("%f,%f,%f,%f\n",x_leg1_coords[i],y_leg1_coords[i],x_leg2_coords[i],y_leg2_coords[i] );
+    }
+
 }
