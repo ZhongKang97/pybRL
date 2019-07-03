@@ -45,7 +45,8 @@ class Stoch2Env(gym.Env):
         self._n_steps = 0
         
         self._action_dim = 10
-        self._obs_dim = 7
+        # self._obs_dim = 7
+        self._obs_dim = 4
         self.action = np.zeros(self._action_dim)
         
         self._last_base_position = [0, 0, 0]
@@ -343,7 +344,9 @@ class Stoch2Env(gym.Env):
 #         observation.extend(self.GetMotorAngles().tolist())
 #         observation.extend(self.GetMotorVelocities().tolist())
 
-        return np.concatenate([pos,ori]).ravel()
+        # return np.concatenate([pos,ori]).ravel()
+        return np.concatenate([ori]).ravel()
+
     
     def GetObservationReset(self):
         """
@@ -369,7 +372,9 @@ class Stoch2Env(gym.Env):
         ori = self._pybullet_client.getQuaternionFromEuler(rpy)
         # print('rpy afer: ', rpy)
         # print('ori after: ', ori)
-        return np.concatenate([pos,ori]).ravel()
+        # return np.concatenate([pos,ori]).ravel()
+        return np.concatenate([ori]).ravel()
+
 
 
     def GetMotorAngles(self):
