@@ -350,7 +350,7 @@ if __name__ == "__main__":
   # print(hp.nb_best_directions)
   print("seed = ", hp.seed)
   np.random.seed(hp.seed)
-  max_processes = 6
+  max_processes = 10
 
   parentPipes = None
   if args.mp:

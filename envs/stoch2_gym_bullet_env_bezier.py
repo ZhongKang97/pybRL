@@ -46,7 +46,7 @@ class Stoch2Env(gym.Env):
         
         self._action_dim = 10
         # self._obs_dim = 7
-        self._obs_dim = 4
+        self._obs_dim = 10
         self.action = np.zeros(self._action_dim)
         
         self._last_base_position = [0, 0, 0]
@@ -339,16 +339,18 @@ class Stoch2Env(gym.Env):
     
     def GetObservation(self):
         observation = []
-        pos, ori = self.GetBasePosAndOrientation()
+        # pos, ori = self.GetBasePosAndOrientation()
+        angles = self.GetMotorAngles()
 #         observation.extend(list(pos))
 #         observation.extend(self.GetMotorAngles().tolist())
 #         observation.extend(self.GetMotorVelocities().tolist())
 
         # return np.concatenate([pos,ori]).ravel()
-        return np.concatenate([ori]).ravel()
+        return np.concatenate([angles]).ravel()
 
     
     def GetObservationReset(self):
+        """
         Resets the robot and returns the base position and Orientation with a random error
         :param : None, should be called in the reset function if an error in initial pos is desired
         :return : Initial state with an error.
@@ -372,7 +374,8 @@ class Stoch2Env(gym.Env):
         # print('rpy afer: ', rpy)
         # print('ori after: ', ori)
         # return np.concatenate([pos,ori]).ravel()
-        return np.concatenate([ori]).ravel()
+        angles = self.GetMotorAngles()
+        return np.concatenate([angles]).ravel()
 
 
 

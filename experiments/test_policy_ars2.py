@@ -46,7 +46,7 @@ env = e2.Stoch2Env(render = True)
 # path = '/home/abhik/pybRL/experiments/Stoch2_ARS_1/iterations/best_policy.npy'
 #'/pybRL/experiments/Stoch2_Jun14_9/iterations/policy_10.npy'
 
-path = os.path.realpath('../..') + '/pybRL/experiments/test2_jul2/iterations/best_policy.npy'
+path = os.path.realpath('../..') + '/pybRL/experiments/Jul8_2/iterations/best_policy.npy'
 state = env.reset()
 nb_inputs = env.observation_space.sample().shape[0]
 normalizer = Normalizer(nb_inputs)
@@ -59,6 +59,7 @@ total_reward = 0
 while i<1000:
     action = np.clip(policy.dot(state), -1, 1)
     state, reward, done, info = env.step(action)
+
     # env.step(env.action_space.sample())
     # print(reward)
     total_reward = total_reward + reward

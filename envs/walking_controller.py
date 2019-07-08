@@ -157,7 +157,7 @@ class WalkingController():
 #         print(action_ref,action_spine)
     
         #leg_motor_angle,leg_motor_vel = j_ang, j_vel
-        leg2_m_angle_cmd = self._spread_motor_commands(leg_motor_angle)
+        leg_m_angle_cmd = self._spread_motor_commands(leg_motor_angle)
         leg_m_vel_cmd = self._spread_motor_commands(leg_motor_vel)
 
         return spine_m_angle_cmd, leg_m_angle_cmd, spine_m_vel_cmd, leg_m_vel_cmd
