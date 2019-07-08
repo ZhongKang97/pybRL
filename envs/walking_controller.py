@@ -137,7 +137,6 @@ class WalkingController():
             tau = theta / PI  # as theta varies from 0 to pi, tau varies from 0 to 1    
             stance_leg = 0 # for pi to 2 pi stance leg is right leg.
         action_ref = self._extend_leg_action_space_for_hzd(tau,action)
-
         leg_motor_angle,leg_motor_vel  = self._action_space_to_command(tau, stance_leg, action_ref)#selects between planning_spaces
         
         if self._spine_enable:
@@ -158,7 +157,7 @@ class WalkingController():
 #         print(action_ref,action_spine)
     
         #leg_motor_angle,leg_motor_vel = j_ang, j_vel
-        leg_m_angle_cmd = self._spread_motor_commands(leg_motor_angle)
+        leg2_m_angle_cmd = self._spread_motor_commands(leg_motor_angle)
         leg_m_vel_cmd = self._spread_motor_commands(leg_motor_vel)
 
         return spine_m_angle_cmd, leg_m_angle_cmd, spine_m_vel_cmd, leg_m_vel_cmd

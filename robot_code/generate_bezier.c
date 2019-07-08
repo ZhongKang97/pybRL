@@ -35,6 +35,5 @@ int main()
         clock_t end = clock();
         time_spent += (double)(end - begin) / CLOCKS_PER_SEC;
     }
-    printf("%f\n", time_spent/1000);
     return 0;
 }
