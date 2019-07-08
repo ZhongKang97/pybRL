@@ -46,7 +46,7 @@ class Stoch2Env(gym.Env):
         
         self._action_dim = 10
         # self._obs_dim = 7
-        self._obs_dim = 10
+        self._obs_dim = 4
         self.action = np.zeros(self._action_dim)
         
         self._last_base_position = [0, 0, 0]
@@ -130,7 +130,7 @@ class Stoch2Env(gym.Env):
         model_path = os.path.realpath('../..')+'/pybRL/envs/stoch_two_urdf/urdf/stoch_two_urdf.urdf'
         self.stoch2 = self._pybullet_client.loadURDF(model_path, INIT_POSITION)
         
-        self._joint_name_to_id, self._motor_id_list = self.BuildMotorIdList()
+        self._joint_name_to_id, self._motor_id_list, self._motor_id_list_obs_space = self.BuildMotorIdList()
 
         num_legs = 4
         for i in range(num_legs):
@@ -340,12 +340,13 @@ class Stoch2Env(gym.Env):
     def GetObservation(self):
         observation = []
         # pos, ori = self.GetBasePosAndOrientation()
-        angles = self.GetMotorAngles()
+        angles = self.GetMotorAnglesObs()
 #         observation.extend(list(pos))
 #         observation.extend(self.GetMotorAngles().tolist())
 #         observation.extend(self.GetMotorVelocities().tolist())
 
         # return np.concatenate([pos,ori]).ravel()
+        # Remove spine angles.
         return np.concatenate([angles]).ravel()
 
     
@@ -356,31 +357,36 @@ class Stoch2Env(gym.Env):
         :return : Initial state with an error.
         Robot starts in the same position, only it's readings have some error. 
         """
-        observation = []
-        pos, ori = self.GetBasePosAndOrientation()
-        pos = np.array(pos)
-        ori = np.array(ori)
-#         observation.extend(list(pos))
-#         observation.extend(self.GetMotorAngles().tolist())
-#         observation.extend(self.GetMotorVelocities().tolist())
-        # print('pos before: ', pos)
-        pos = pos + np.random.normal(scale = 0.03, size = 3)
-        # print('pos after: ', pos)
-        rpy = self._pybullet_client.getEulerFromQuaternion(ori)
-        # print('rpy before: ', pos)
-        # print('ori before: ', ori)
-        rpy = rpy + np.random.normal(scale = np.pi/180, size = 3)
-        ori = self._pybullet_client.getQuaternionFromEuler(rpy)
+#         observation = []
+#         pos, ori = self.GetBasePosAndOrientation()
+#         pos = np.array(pos)
+#         ori = np.array(ori)
+# #         observation.extend(list(pos))
+# #         observation.extend(self.GetMotorAngles().tolist())
+# #         observation.extend(self.GetMotorVelocities().tolist())
+#         # print('pos before: ', pos)
+#         pos = pos + np.random.normal(scale = 0.03, size = 3)
+#         # print('pos after: ', pos)
+#         rpy = self._pybullet_client.getEulerFromQuaternion(ori)
+#         # print('rpy before: ', pos)
+#         # print('ori before: ', ori)
+#         rpy = rpy + np.random.normal(scale = np.pi/180, size = 3)
+#         ori = self._pybullet_client.getQuaternionFromEuler(rpy)
         # print('rpy afer: ', rpy)
         # print('ori after: ', ori)
         # return np.concatenate([pos,ori]).ravel()
-        angles = self.GetMotorAngles()
+        angles = self.GetMotorAnglesObs()
+
         return np.concatenate([angles]).ravel()
 
 
 
     def GetMotorAngles(self):
         motor_ang = [self._pybullet_client.getJointState(self.stoch2, motor_id)[0] for motor_id in self._motor_id_list]
+        return motor_ang
+    
+    def GetMotorAnglesObs(self):
+        motor_ang = [self._pybullet_client.getJointState(self.stoch2, motor_id)[0] for motor_id in self._motor_id_list_obs_space]
         return motor_ang
 
     def GetMotorVelocities(self):
@@ -425,8 +431,26 @@ class Stoch2Env(gym.Env):
                         "motor_bl_upper_knee_joint", 
                         "motor_br_upper_hip_joint", 
                         "motor_br_upper_knee_joint",]
+        
+        #   WITHOUT SPINE
+        # MOTOR_NAMES = [ "motor_fl_upper_hip_joint",
+        #                 "motor_fl_upper_knee_joint", 
+        #                 "motor_fr_upper_hip_joint",
+        #                 "motor_fr_upper_knee_joint", 
+        #                 "motor_bl_upper_hip_joint",
+        #                 "motor_bl_upper_knee_joint", 
+        #                 "motor_br_upper_hip_joint", 
+        #                 "motor_br_upper_knee_joint",]
+        # Even smaller workspace
+        
+        MOTOR_NAMES2 = [ "motor_fl_upper_hip_joint",
+                        "motor_fl_upper_knee_joint",  
+                        "motor_bl_upper_hip_joint",
+                        "motor_bl_upper_knee_joint"]
         motor_id_list = [joint_name_to_id[motor_name] for motor_name in MOTOR_NAMES]
-        return joint_name_to_id, motor_id_list
+        motor_id_list_obs_space = [joint_name_to_id[motor_name] for motor_name in MOTOR_NAMES2]
+
+        return joint_name_to_id, motor_id_list, motor_id_list_obs_space
     
     def ResetLeg(self, leg_id, add_constraint):
         leg_position = LEG_POSITION[leg_id]
