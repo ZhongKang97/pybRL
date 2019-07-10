@@ -16,7 +16,7 @@ print(matplotlib.get_backend())
 # path = '/home/abhik/pybRL/experiments/Stoch2_ARS_1/iterations/best_policy.npy'
 #'/pybRL/experiments/Stoch2_Jun14_9/iterations/policy_10.npy'
 
-path = os.path.realpath('../..') + '/pybRL/experiments/test2_jul2/iterations/best_policy.npy'
+path = os.path.realpath('../..') + '/pybRL/experiments/Jul8_3/iterations/policy_21.npy'
 # logger = DataLog()
 i = 0
 policy = np.load(path)

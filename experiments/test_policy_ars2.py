@@ -46,7 +46,7 @@ env = e2.Stoch2Env(render = True)
 # path = '/home/abhik/pybRL/experiments/Stoch2_ARS_1/iterations/best_policy.npy'
 #'/pybRL/experiments/Stoch2_Jun14_9/iterations/policy_10.npy'
 
-path = os.path.realpath('../..') + '/pybRL/experiments/Jul8_2/iterations/best_policy.npy'
+path = os.path.realpath('../..') + '/pybRL/experiments/Jul8_3/iterations/policy_24.npy'
 state = env.reset()
 nb_inputs = env.observation_space.sample().shape[0]
 normalizer = Normalizer(nb_inputs)
