@@ -22,7 +22,7 @@ i = 0
 policy = np.load(path)
 total_reward = 0
 walkcon = walking_controller.WalkingController(gait_type='trot',spine_enable = False,
-                                                planning_space = 'cartesian_task_space',
+                                                planning_space = 'polar_task_space',
                                                 left_to_right_switch = True,
                                                 frequency=1.)
 theta = 0
@@ -41,13 +41,14 @@ while theta < 2*math.pi:
         tau = theta / math.pi  # as theta varies from 0 to pi, tau varies from 0 to 1    
         stance_leg = 0 # for pi to 2 pi stance leg is right leg.
     action_ref = walkcon._extend_leg_action_space_for_hzd(tau,action)
-    xy, dxdy = walkcon._transform_action_to_xy_via_bezier_polynomials(tau, stance_leg, action_ref)
+    rt, drdt = walkcon._transform_action_to_r_and_theta_via_bezier_polynomials(tau, stance_leg, action_ref)
 
     theta = theta + 0.001*2*math.pi
-    x_leg_1.append(xy[0])
-    y_leg_1.append(xy[1])
-    x_leg_2.append(xy[2])
-    y_leg_2.append(xy[3])
+    
+    x_leg_1.append(rt[0]*math.sin(rt[1]))
+    y_leg_1.append(-rt[0]*math.cos(rt[1]))
+    x_leg_2.append(rt[2]*math.sin(rt[3]))
+    y_leg_2.append(-rt[2]*math.cos(rt[3]))
 
 plt.figure()
 plt.plot(x_leg_1, y_leg_1)
