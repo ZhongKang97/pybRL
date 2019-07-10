@@ -1,9 +1,0 @@
-learning_rate: 0.2
-noise: 0.03
-env_name: Stoch2-v1
-episode_length: 1000.0
-energy weight: 0.005
-direction ratio: 2.0
-Normal initialization: 0
-Forward reward cap: 0.006
-Increasing the forward reward cap since it couldnt learn anything
