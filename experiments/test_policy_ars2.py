@@ -46,7 +46,7 @@ env = e2.Stoch2Env(render = True)
 # path = '/home/abhik/pybRL/experiments/Stoch2_ARS_1/iterations/best_policy.npy'
 #'/pybRL/experiments/Stoch2_Jun14_9/iterations/policy_10.npy'
 
-path = os.path.realpath('../..') + '/pybRL/experiments/Jul8_3/iterations/policy_24.npy'
+path = os.path.realpath('../..') + '/pybRL/experiments/Jul8_2/iterations/policy_16.npy'
 state = env.reset()
 nb_inputs = env.observation_space.sample().shape[0]
 normalizer = Normalizer(nb_inputs)
@@ -55,8 +55,8 @@ i = 0
 policy = np.load(path)
 print(policy)
 total_reward = 0
-
-while i<1000:
+states = []
+while i<10:
     action = np.clip(policy.dot(state), -1, 1)
     state, reward, done, info = env.step(action)
 
@@ -64,12 +64,14 @@ while i<1000:
     # print(reward)
     total_reward = total_reward + reward
     i =i+1
+    states.append(state)
     # logger.log_kv('x_leg1', info['xpos'][0])
     # logger.log_kv('x_leg2', info['xpos'][1])
     # logger.log_kv('y_leg1', info['ypos'][0])
     # logger.log_kv('y_leg2', info['ypos'][1])
 
     # time.sleep(1./30.)
+print(states)
 print(total_reward/1000)
 
 # plotter.plot_traj(logger, ['x_leg1', 'x_leg2'], ['y_leg1', 'y_leg2'], ['Leg1 Trajectory, rep:5', 'Leg2 Trajectory, rep:5'], save_loc= './')

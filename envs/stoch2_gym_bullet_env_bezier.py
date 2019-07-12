@@ -46,7 +46,7 @@ class Stoch2Env(gym.Env):
         
         self._action_dim = 10
         # self._obs_dim = 7
-        self._obs_dim = 4
+        self._obs_dim = 10
         self.action = np.zeros(self._action_dim)
         
         self._last_base_position = [0, 0, 0]
@@ -116,7 +116,6 @@ class Stoch2Env(gym.Env):
                       -0.1782,-0.1787,-0.1793,-0.1812,-0.1831,-0.1850,-0.1869,-0.1888,-0.1911,-0.1936])
         
         self.hard_reset()
-    
     def hard_reset(self):
         self._pybullet_client.resetSimulation()
         self._pybullet_client.setPhysicsEngineParameter(numSolverIterations=int(300))
@@ -340,13 +339,15 @@ class Stoch2Env(gym.Env):
     def GetObservation(self):
         observation = []
         # pos, ori = self.GetBasePosAndOrientation()
-        angles = self.GetMotorAnglesObs()
+        angles = self.GetMotorAngles()
 #         observation.extend(list(pos))
 #         observation.extend(self.GetMotorAngles().tolist())
 #         observation.extend(self.GetMotorVelocities().tolist())
 
         # return np.concatenate([pos,ori]).ravel()
         # Remove spine angles.
+        #10 degree noise
+        angles = angles + np.random.normal(scale = 0.1745, size= 10)
         return np.concatenate([angles]).ravel()
 
     
@@ -375,8 +376,9 @@ class Stoch2Env(gym.Env):
         # print('rpy afer: ', rpy)
         # print('ori after: ', ori)
         # return np.concatenate([pos,ori]).ravel()
-        angles = self.GetMotorAnglesObs()
-
+        angles = self.GetMotorAngles()
+        #10 degree noise
+        angles = angles + np.random.normal(scale = 0.1745, size= 10)
         return np.concatenate([angles]).ravel()
 
 
