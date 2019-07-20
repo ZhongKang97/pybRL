@@ -33,7 +33,10 @@ y_leg_2 = []
 # action = np.clip(policy.dot(state), -1, 1)
 action = np.array([ 0.24504616, -0.11582746,  0.71558934, -0.46091432, -0.36284493,  0.00495828,
  -0.06466855, -0.45247894,  0.72117291, -0.11068088])
-while theta < 2*math.pi:
+count =0
+while count < 1000 :
+    if(theta > 2*math.pi):
+        theta = 0
     if theta > math.pi:
         tau = (theta - math.pi)/math.pi  # as theta varies from pi to 2 pi, tau varies from 0 to 1    
         stance_leg = 1 # for 0 to pi, stance leg is left leg. (note robot behavior sometimes is erratic, so stance leg is not explicitly seen)
@@ -43,13 +46,13 @@ while theta < 2*math.pi:
     action_ref = walkcon._extend_leg_action_space_for_hzd(tau,action)
     rt, drdt = walkcon._transform_action_to_r_and_theta_via_bezier_polynomials(tau, stance_leg, action_ref)
 
-    theta = theta + 0.001*2*math.pi
+    theta = theta + 0.01*math.pi
     
     x_leg_1.append(rt[0]*math.sin(rt[1]))
     y_leg_1.append(-rt[0]*math.cos(rt[1]))
     x_leg_2.append(rt[2]*math.sin(rt[3]))
     y_leg_2.append(-rt[2]*math.cos(rt[3]))
-
+    count = count + 1
 plt.figure()
 plt.plot(x_leg_1, y_leg_1)
 plt.show()

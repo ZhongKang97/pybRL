@@ -41,25 +41,29 @@ class Normalizer():
 # p.connect(p.GUI)
 # env = e.MinitaurTrottingEnv(render=True)
 # env = e.StochBulletEnv(render = True, gait = 'trot', energy_weight= 0.000 )
-env = e2.Stoch2Env(render = True)
+env = e2.Stoch2Env(render = False)
 # path = '/home/sashank/mjrl-master/pybRL/experiments/policy_MinitaurTrottingEnv-v0_20190522-110536.npy'
 # path = '/home/abhik/pybRL/experiments/Stoch2_ARS_1/iterations/best_policy.npy'
 #'/pybRL/experiments/Stoch2_Jun14_9/iterations/policy_10.npy'
 
-path = os.path.realpath('../..') + '/pybRL/experiments/Jul8_3/iterations/policy_24.npy'
+path = os.path.realpath('../..') + '/pybRL/experiments/Jul8_2/iterations/best_policy.npy'
 state = env.reset()
 nb_inputs = env.observation_space.sample().shape[0]
 normalizer = Normalizer(nb_inputs)
 logger = DataLog()
 i = 0
 policy = np.load(path)
+np.save(os.path.realpath('../..') + '/pybRL/sim2real/ARS_matrix.npy', policy)
+exit()
 print(policy)
 total_reward = 0
-
-while i<1000:
-    action = np.clip(policy.dot(state), -1, 1)
+action= np.array([0.10764433, -0.22723689,  0.37480827,  0.01160054, -0.18521147,  0.01536253,
+  0.07677522, -0.65195124,  0.0739685,  -0.23965774])
+states = []
+while i<12:
+    # action = np.clip(policy.dot(state), -1, 1)
     state, reward, done, info = env.step(action)
-
+    states.append(state)
     # env.step(env.action_space.sample())
     # print(reward)
     total_reward = total_reward + reward
@@ -70,6 +74,5 @@ while i<1000:
     # logger.log_kv('y_leg2', info['ypos'][1])
 
     # time.sleep(1./30.)
-print(total_reward/1000)
-
+print(states)
 # plotter.plot_traj(logger, ['x_leg1', 'x_leg2'], ['y_leg1', 'y_leg2'], ['Leg1 Trajectory, rep:5', 'Leg2 Trajectory, rep:5'], save_loc= './')
