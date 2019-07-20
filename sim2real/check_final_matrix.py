@@ -4,7 +4,7 @@ import pandas as pd
 #check Final Results only
 finalA = np.load("finalA.npy")
 finalB = np.load("finalB.npy")
-inp_df = pd.read_csv("action1.csv")
+inp_df = pd.read_csv("action2.csv")
 val_df = inp_df.loc[inp_df['index'].isin([0.0, 199.0, 100.0])]
 val_df = val_df.drop(columns = ['index'])
 for i, row in val_df.iterrows():
