@@ -16,7 +16,7 @@ import os
 import math
 import numpy as np
 from scipy.linalg import solve
-
+import matplotlib.pyplot as plt
 PI = math.pi
 
 class WalkingController():
@@ -27,7 +27,8 @@ class WalkingController():
                  spine_enable = False,
                  frequency=2,
                  planning_space = 'joint_space',
-                 left_to_right_switch = float('nan')
+                 left_to_right_switch = float('nan'),
+                 phase = [0,0,0,0]
                  ):
         
         ## These are empirical parameters configured to get the right controller, these were obtained from previous training iterations
@@ -45,7 +46,7 @@ class WalkingController():
                 self._left_to_right_switch = False
         else:
             self._left_to_right_switch = left_to_right_switch
-            
+        self.phase = {'front-left':phase[0], 'front-right':phase[1], 'back-left':phase[2] , 'back-right':phase[3]}
         self._action_leg_indices = [1,2,3,4,6,7,8,9]
         self._action_spine_indices = [0,5]
         self._action_rt_indices = [10,11]
@@ -159,8 +160,92 @@ class WalkingController():
         #leg_motor_angle,leg_motor_vel = j_ang, j_vel
         leg_m_angle_cmd = self._spread_motor_commands(leg_motor_angle)
         leg_m_vel_cmd = self._spread_motor_commands(leg_motor_vel)
-
+        # print('1: ',leg_m_angle_cmd)
         return spine_m_angle_cmd, leg_m_angle_cmd, spine_m_vel_cmd, leg_m_vel_cmd
+    
+    def transform_action_to_motor_joint_command2(self, theta, action):
+        theta0 = 0
+        r1 = []
+        theta1 = []
+        rtol = 0.1
+        flg = False
+        index = 0
+        phase = self.phase
+        legs = {'front-left':{}, 'front-right':{}, 'back-left':{} , 'back-right':{}}
+        def add_phase(angle, phase):
+            if (-PI <= angle + phase <= PI):
+                return angle + phase
+            if(angle + phase > PI):
+                return angle + phase - 2*PI
+            if(angle + phase < -PI):
+                return angle + phase + 2*PI
+        while(theta0 < 2*PI):
+            if(theta0 > PI):
+                tau = (theta0 - PI)/PI
+                stance_leg = 1
+            else:
+                tau = theta0/ PI
+                stance_leg = 0
+            action_ref = self._extend_leg_action_space_for_hzd(tau,action)
+            r_and_theta, dr_dtheta = self._transform_action_to_r_and_theta_via_bezier_polynomials(tau, stance_leg, action_ref)
+            xy = np.zeros(2)
+            rt = np.zeros(2)
+            y_center = -0.17
+            r_ac = r_and_theta[0] # first value is r and second value is theta
+            the_ac = r_and_theta[1] # already converted to radians in stoch2_gym_env
+            xy[0] =  r_ac*math.sin(the_ac)
+            xy[1] = -r_ac*math.cos(the_ac) - y_center # negative y direction for using the IK solver
+            rt[0] = (xy[0]**2 + xy[1]**2)**0.5
+            rt[1] = math.atan2(xy[1], xy[0])
+            r1.append(rt[0])
+            theta1.append(rt[1])
+            if(abs(theta - theta0)<rtol*PI):
+                # print('thetas: ',theta0, theta)
+                # print('comparison: ', xy[0], xy[1], 'and', rt[0]*math.cos(rt[1]), rt[0]*math.sin(rt[1]))
+                legs['front-right']['radius'] = rt[0]
+                legs['front-right']['theta'] = add_phase(rt[1],phase['front-right'])
+            theta0 = theta0 + rtol*PI
+        legs['front-left']['theta'] = add_phase (legs['front-right']['theta'],phase['front-left'])
+        legs['back-left']['theta'] = add_phase(legs['front-right']['theta'], phase['back-left'])
+        legs['back-right']['theta'] = add_phase(legs['front-right']['theta'],phase['back-right'])
+
+        theta1 = np.array(theta1)
+        legs['front-left']['radius'] = r1[np.abs(theta1 - legs['front-left']['theta']).argmin()]
+        legs['back-left']['radius'] = r1[np.abs(theta1 - legs['back-left']['theta']).argmin()]
+        legs['back-right']['radius'] = r1[np.abs(theta1 - legs['back-right']['theta']).argmin()]
+
+        legs['front-left']['x'] = legs['front-left']['radius'] * math.cos(legs['front-left']['theta'])
+        legs['front-left']['y'] = legs['front-left']['radius'] * math.sin(legs['front-left']['theta']) + y_center
+        # print("2: ",legs['front-left']['x'],legs['front-left']['y'])
+
+        legs['front-right']['x'] = legs['front-right']['radius'] * math.cos(legs['front-right']['theta'])
+        legs['front-right']['y'] = legs['front-right']['radius'] * math.sin(legs['front-right']['theta']) + y_center
+        # print("2: ",legs['front-right']['x'],legs['front-right']['y'])
+
+        legs['back-right']['x'] = legs['back-right']['radius'] * math.cos(legs['back-right']['theta'])
+        legs['back-right']['y'] = legs['back-right']['radius'] * math.sin(legs['back-right']['theta']) + y_center
+
+        legs['back-left']['x'] = legs['back-left']['radius'] * math.cos(legs['back-left']['theta'])
+        legs['back-left']['y'] = legs['back-left']['radius'] * math.sin(legs['back-left']['theta']) + y_center
+        
+        legs['back-left']['motor-knee'], legs['back-left']['motor-hip'], _, _ = self._inverse_stoch2(legs['back-left']['x'], legs['back-left']['y'], self._leg)
+        legs['back-right']['motor-knee'], legs['back-right']['motor-hip'], _, _ = self._inverse_stoch2(legs['back-right']['x'], legs['back-right']['y'], self._leg)
+        legs['front-left']['motor-knee'], legs['front-left']['motor-hip'], _, _ = self._inverse_stoch2(legs['front-left']['x'], legs['front-left']['y'], self._leg)
+        legs['front-right']['motor-knee'], legs['front-right']['motor-hip'], _, _ = self._inverse_stoch2(legs['front-right']['x'], legs['front-right']['y'], self._leg)
+        legs['back-left']['motor-knee']   = legs['back-left']['motor-knee'] + self.MOTOROFFSETS[1]
+        legs['back-right']['motor-knee']  =  legs['back-right']['motor-knee'] + self.MOTOROFFSETS[1]
+        legs['front-left']['motor-knee']  =  legs['front-left']['motor-knee'] + self.MOTOROFFSETS[1]
+        legs['front-right']['motor-knee'] = legs['front-right']['motor-knee'] + self.MOTOROFFSETS[1]
+
+        legs['back-left']['motor-hip']   = legs['back-left']['motor-hip'] + self.MOTOROFFSETS[0]
+        legs['back-right']['motor-hip']  = legs['back-right']['motor-hip'] + self.MOTOROFFSETS[0]
+        legs['front-left']['motor-hip']  = legs['front-left']['motor-hip'] + self.MOTOROFFSETS[0]
+        legs['front-right']['motor-hip'] = legs['front-right']['motor-hip'] + self.MOTOROFFSETS[0]
+
+        leg_motor_angles = [legs['front-right']['motor-hip'],legs['front-right']['motor-knee'],legs['front-left']['motor-hip'],legs['front-left']['motor-knee'],
+        legs['back-right']['motor-hip'],legs['back-right']['motor-knee'],legs['back-left']['motor-hip'],legs['back-left']['motor-knee']]
+        # print('2: ',leg_motor_angles)
+        return np.zeros(2), leg_motor_angles , np.zeros(2), np.zeros(8)
 
     def _Bezier_polynomial(self,tau,nTraj):
         Phi = np.zeros(4*nTraj)
@@ -215,9 +300,7 @@ class WalkingController():
         action_spine = np.zeros(8)
         action_spine[[0,3]] = self._action_spine_ref[[0,3]] + action[self._action_spine_indices]
         action_spine[[4,7]] = self._action_spine_ref[[4,7]] - action[self._action_spine_indices]
-        
         return action_spine
-        
     def _transform_action_to_joint_angle_via_bezier_polynomials(self, tau, stance_leg, action):
 
         joint_ang = np.zeros(4)
@@ -377,7 +460,7 @@ class WalkingController():
 
             xy[2*i] =  r_ac*math.sin(the_ac)
             xy[2*i+1] = -r_ac*math.cos(the_ac) # negative y direction for using the IK solver
-            
+        # print("1: ", xy[2], xy[3])
         motor_angle = self._ConvertXYtoHipKneeJointMotorAngle(xy)
         
         return motor_angle
@@ -405,7 +488,7 @@ class WalkingController():
 
             motor_angle[2*i] = hip + self.MOTOROFFSETS[0]
             motor_angle[2*i+1] = knee + self.MOTOROFFSETS[1]
-        
+
         return motor_angle
 
     def _ConvertRThetatoHipKneeJointMotorVel(self, r_and_theta, dr_and_dtheta, motor_angle):
@@ -812,3 +895,20 @@ class Stoch2Kinematics(object):
         mat = J_xth - J_xphi*(K_phi_inv*K_th)
 
         return mat
+
+
+if(__name__ == "__main__"):
+    action = np.array([ 0.24504616, -0.11582746,  0.71558934, -0.46091432, -0.36284493,  0.00495828, -0.06466855, -0.45247894,  0.72117291, -0.11068088])
+    walkcon = WalkingController(planning_space="polar_task_space")
+    theta = 0
+    leg2s =[]
+    legs =[]
+    while(theta < 2*PI):
+        s, leg2, _ , _ = walkcon.transform_action_to_motor_joint_command2(theta, action)
+        s, leg, _, _ = walkcon.transform_action_to_motor_joint_command(theta, action)
+        leg2s.append(leg2)
+        legs.append(leg)
+        theta = theta + PI/1000
+    leg2s = np.array(leg2)
+    legs = np.array(legs)
+    print(np.mean(np.abs(leg2s - legs)))

@@ -26,7 +26,8 @@ class Stoch2Env(gym.Env):
     def __init__(self,
                  render = False,
                  on_rack = False,
-                 gait = 'trot'):
+                 gait = 'trot',
+                 phase = [0,0,0,0]):
         
         self._is_render = render
         self._on_rack = on_rack
@@ -44,7 +45,6 @@ class Stoch2Env(gym.Env):
         self.dt = 0.001
         self._frame_skip = 5
         self._n_steps = 0
-        
         self._action_dim = 10
         # self._obs_dim = 7
         self._obs_dim = 4
@@ -60,7 +60,8 @@ class Stoch2Env(gym.Env):
                                                              spine_enable = False,
                                                              planning_space = 'polar_task_space',
                                                              left_to_right_switch = True,
-                                                             frequency=self._frequency)
+                                                             frequency=self._frequency,
+                                                             phase=phase)
         
         self._cam_dist = 1.0
         self._cam_yaw = 0.0
@@ -192,6 +193,7 @@ class Stoch2Env(gym.Env):
             theta = self._theta
             
             spine_des, leg_m_angle_cmd, d_spine_des, leg_m_vel_cmd = self._walkcon.transform_action_to_motor_joint_command(theta,action)
+            spine_des, leg_m_angle_cmd, d_spine_des, leg_m_vel_cmd = self._walkcon.transform_action_to_motor_joint_command2(theta,action)   
             self._theta = (omega * self.dt + theta)
             
 #             if  p_index==0:
