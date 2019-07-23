@@ -1,0 +1,9 @@
+learning_rate: 0.05
+noise: 0.03
+env_name: Stoch2-v4
+episode_length: 10
+energy weight: 0.2
+direction ratio: 2.0
+Normal initialization: 0
+Forward reward cap: 10000
+Testing with the steps right next to the robot Step_length =0.06

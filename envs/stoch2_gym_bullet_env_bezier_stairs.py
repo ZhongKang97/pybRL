@@ -117,12 +117,12 @@ class Stoch2Env(gym.Env):
         
         self.hard_reset()
 
-        boxHalfLength = 0.1
+        boxHalfLength = 0.06
         boxHalfWidth = 2.5
         boxHalfHeight = 0.02
         sh_colBox = self._pybullet_client.createCollisionShape(self._pybullet_client.GEOM_BOX,halfExtents=[boxHalfLength,boxHalfWidth,boxHalfHeight])
-        boxOrigin = 0.5
-        n_steps = 10
+        boxOrigin = 0.25
+        n_steps = 30
         for i in range(n_steps):
             block=self._pybullet_client.createMultiBody(baseMass=0,baseCollisionShapeIndex = sh_colBox,
                                     basePosition = [boxOrigin + i*2*boxHalfLength,0,boxHalfHeight + i*2*boxHalfHeight],baseOrientation=[0.0,0.0,0.0,1])
@@ -329,7 +329,7 @@ class Stoch2Env(gym.Env):
         
 #         rt_start, _ = self._walkcon.transform_action_to_rt(0, action)
 #         rt_mid, _ = self._walkcon.transform_action_to_rt(math.pi/2, action)
-#         print('r and theta start',rt_start,'r and theta mid',rt_mid)
+#         print('r and theta start',rt_start,'r and theta mGetObsid',rt_mid)
         
 #         foot_clearance_reward = 0.5 * np.exp(-10*(0.05 - (rt_mid[0] - rt_mid[2]))**2)
 #         foot_clearance_reward = 0.5 * np.exp(-2*(0.23 - rt_mid[0])**2) + 0.5 * np.exp(-2*(0.18 - rt_mid[2])**2)
@@ -351,7 +351,7 @@ class Stoch2Env(gym.Env):
     
     def GetObservation(self):
         observation = []
-        # pos, ori = self.GetBasePosAndOrientation()
+        pos, ori = self.GetBasePosAndOrientation()
         angles = self.GetMotorAngles()
 #         observation.extend(list(pos))
 #         observation.extend(self.GetMotorAngles().tolist())

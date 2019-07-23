@@ -307,6 +307,7 @@ if __name__ == "__main__":
   parser.add_argument(
       '--logdir', help='Directory root to log policy files (npy)', type=str, default='.')
   parser.add_argument('--mp', help='Enable multiprocessing', type=int, default=1)
+  #these you have to set
   parser.add_argument('--lr', help='learning rate', type=float, default=0.2)
   parser.add_argument('--noise', help='noise hyperparameter', type=float, default=0.03)
   parser.add_argument('--episode_length', help='length of each episode', type=float, default=10)
@@ -319,9 +320,10 @@ if __name__ == "__main__":
 
 
   args = parser.parse_args()
- 
   # #Custom environments that you want to use ----------------------------------------------------------------------------------------
-  register(id='Stoch2-v0',entry_point='pybRL.envs.stoch2_gym_bullet_env_bezier:Stoch2Env')
+  register(id='Stoch2-v0',entry_point='pybRL.envs.stoch2_gym_bullet_env_bezier:Stoch2Env', kwargs = {'gait' : args.gait} )
+  register(id='Stoch2-v3',entry_point='pybRL.envs.stoch2_gym_bullet_env_bezier_stairs:Stoch2Env')
+  register(id='Stoch2-v4',entry_point='pybRL.envs.stoch2_gym_bullet_env_bezier_stairs_kartik:Stoch2Env')
   register(id='Stoch2-v1',entry_point='pybRL.envs.stoch2_gym_bullet_env_normal:StochBulletEnv', 
   kwargs = {'gait': args.gait, 
   'energy_weight': args.energy_weight, 

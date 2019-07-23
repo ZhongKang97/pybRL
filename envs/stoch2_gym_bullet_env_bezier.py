@@ -25,7 +25,8 @@ class Stoch2Env(gym.Env):
     
     def __init__(self,
                  render = False,
-                 on_rack = False):
+                 on_rack = False,
+                 gait = 'trot'):
         
         self._is_render = render
         self._on_rack = on_rack
@@ -47,13 +48,15 @@ class Stoch2Env(gym.Env):
         self._action_dim = 10
         # self._obs_dim = 7
         self._obs_dim = 10
+        # self._obs_dim = 4
         self.action = np.zeros(self._action_dim)
         
         self._last_base_position = [0, 0, 0]
         self._distance_limit = float("inf")
 
         self._xpos_previous = 0.0
-        self._walkcon = walking_controller.WalkingController(gait_type='trot',
+        #changed type to canter
+        self._walkcon = walking_controller.WalkingController(gait_type=gait,
                                                              spine_enable = False,
                                                              planning_space = 'polar_task_space',
                                                              left_to_right_switch = True,
@@ -344,10 +347,9 @@ class Stoch2Env(gym.Env):
 #         observation.extend(self.GetMotorAngles().tolist())
 #         observation.extend(self.GetMotorVelocities().tolist())
 
-        # return np.concatenate([pos,ori]).ravel()
+        # return np.concatenate([ori]).ravel()
         # Remove spine angles.
         #10 degree noise
-        angles = angles + np.random.normal(scale = 0.1745, size= 10)
         return np.concatenate([angles]).ravel()
 
     
@@ -359,7 +361,7 @@ class Stoch2Env(gym.Env):
         Robot starts in the same position, only it's readings have some error. 
         """
 #         observation = []
-#         pos, ori = self.GetBasePosAndOrientation()
+        pos, ori = self.GetBasePosAndOrientation()
 #         pos = np.array(pos)
 #         ori = np.array(ori)
 # #         observation.extend(list(pos))
@@ -376,9 +378,9 @@ class Stoch2Env(gym.Env):
         # print('rpy afer: ', rpy)
         # print('ori after: ', ori)
         # return np.concatenate([pos,ori]).ravel()
+        # return np.concatenate([ori]).ravel()
         angles = self.GetMotorAngles()
         #10 degree noise
-        angles = angles + np.random.normal(scale = 0.1745, size= 10)
         return np.concatenate([angles]).ravel()
 
 

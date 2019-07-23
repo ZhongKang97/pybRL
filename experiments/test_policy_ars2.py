@@ -13,6 +13,9 @@ import pybullet_envs.bullet.minitaur_gym_env as e
 import pybullet_envs.minitaur.envs.minitaur_trotting_env as e
 import pybRL.envs.stoch2_gym_bullet_env_normal as e
 import pybRL.envs.stoch2_gym_bullet_env_bezier as e2
+import pybRL.envs.stoch2_gym_bullet_env_bezier_stairs as e3
+import pybRL.envs.stoch2_gym_bullet_env_bezier_stairs_kartik as e4
+
 
 import pybullet as p
 import numpy as np
@@ -41,12 +44,13 @@ class Normalizer():
 # p.connect(p.GUI)
 # env = e.MinitaurTrottingEnv(render=True)
 # env = e.StochBulletEnv(render = True, gait = 'trot', energy_weight= 0.000 )
-env = e2.Stoch2Env(render = True)
+env = e2.Stoch2Env(render = True, gait = 'trot')
+# env = e4.Stoch2Env(render = True)
 # path = '/home/sashank/mjrl-master/pybRL/experiments/policy_MinitaurTrottingEnv-v0_20190522-110536.npy'
 # path = '/home/abhik/pybRL/experiments/Stoch2_ARS_1/iterations/best_policy.npy'
 #'/pybRL/experiments/Stoch2_Jun14_9/iterations/policy_10.npy'
-
-path = os.path.realpath('../..') + '/pybRL/experiments/Jul8_2/iterations/policy_16.npy'
+path = '/pybRL/experiments/sashu_canter_1/iterations/best_policy.npy'
+path = os.path.realpath('../..') + path
 state = env.reset()
 nb_inputs = env.observation_space.sample().shape[0]
 normalizer = Normalizer(nb_inputs)
@@ -56,7 +60,9 @@ policy = np.load(path)
 print(policy)
 total_reward = 0
 states = []
-while i<10:
+# action = np.array([ 0.24504616, -0.11582746,  0.71558934, -0.46091432, -0.36284493,  0.00495828,
+#  -0.06466855, -0.45247894,  0.72117291, -0.11068088])
+while i<100:
     action = np.clip(policy.dot(state), -1, 1)
     state, reward, done, info = env.step(action)
 
