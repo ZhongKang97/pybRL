@@ -12,7 +12,7 @@ import time
 import pybullet
 import pybRL.envs.bullet_client as bullet_client
 import pybullet_data
-
+import matplotlib.pyplot as plt
 INIT_POSITION = [0, 0, 0.29] 
 INIT_ORIENTATION = [0, 0, 0, 1]
 LEG_POSITION = ["fl_", "bl_", "fr_", "br_"]
@@ -20,6 +20,7 @@ KNEE_CONSTRAINT_POINT_RIGHT = [0.014, 0, 0.076] #hip
 KNEE_CONSTRAINT_POINT_LEFT = [0.0,0.0,-0.077] #knee
 RENDER_HEIGHT = 720 #360
 RENDER_WIDTH = 960 #480 
+PI = math.pi
 
 class Stoch2Env(gym.Env):
     
@@ -27,7 +28,7 @@ class Stoch2Env(gym.Env):
                  render = False,
                  on_rack = False,
                  gait = 'trot',
-                 phase = [0,0,0,0]):
+                 phase = [PI,0,0,PI]):
         
         self._is_render = render
         self._on_rack = on_rack
@@ -188,13 +189,19 @@ class Stoch2Env(gym.Env):
         cost_reference = 0
         ii = 0
         angle_data = []
+        x1 = []
+        y1 = []
+        x2 = []
+        y2 = []
         while(self._theta - self._theta0 <= math.pi * self._update_action_every and not self._theta >= 2 * math.pi):
 
             theta = self._theta
             
-            spine_des, leg_m_angle_cmd, d_spine_des, leg_m_vel_cmd = self._walkcon.transform_action_to_motor_joint_command(theta,action)
-            spine_des, leg_m_angle_cmd, d_spine_des, leg_m_vel_cmd = self._walkcon.transform_action_to_motor_joint_command2(theta,action)   
+            # spine_des, leg_m_angle_cmd, d_spine_des, leg_m_vel_cmd = self._walkcon.transform_action_to_motor_joint_command(theta,action)
+            # spine_des, leg_m_angle_cmd, d_spine_des, leg_m_vel_cmd = self._walkcon.transform_action_to_motor_joint_command2(theta,action) 
+            spine_des, leg_m_angle_cmd, d_spine_des, leg_m_vel_cmd= self._walkcon.transform_action_to_motor_joint_command3(theta,action)   
             self._theta = (omega * self.dt + theta)
+            # self._theta = theta + 2*PI/100
             
 #             if  p_index==0:
             qpos_act = np.array(self.GetMotorAngles())
@@ -575,6 +582,6 @@ class Stoch2Env(gym.Env):
 
 
 if(__name__ == "__main__"):
-    env = Stoch2Env()
-    state = env.reset()
-    print(state)
+    env = Stoch2Env(render=True)
+    for i in range(10):
+        env.step(np.array([0,0,0,0,0,0,0,0,0,0]))
