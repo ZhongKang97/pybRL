@@ -62,42 +62,42 @@ while theta < 2*math.pi :
     theta_leg2.append(rt[3])
 
     x = rt[0]*math.sin(rt[1])
-    y = -rt[0]*math.cos(rt[1]) - y_center
+    y = -rt[0]*math.cos(rt[1])
     x_leg_1.append(x)
     y_leg_1.append(y)
-    x_leg_2.append(rt[2]*math.sin(rt[3]))
-    y_leg_2.append(-rt[2]*math.cos(rt[3]))
-    r_leg1.append((x**2 + y**2)**0.5 )
-    theta_leg1.append(math.atan2(y,x))
-    count = count + 1
+    # x_leg_2.append(rt[2]*math.sin(rt[3]))
+    # y_leg_2.append(-rt[2]*math.cos(rt[3]))
+    # r_leg1.append((x**2 + y**2)**0.5 )
+    # theta_leg1.append(math.atan2(y,x))
+    # count = count + 1
 
-# plt.figure()
-# plt.plot(x_leg_1, y_leg_1)
-# plt.show()
-# print(theta)
-r_leg1 = np.array(r_leg1)
-# print(r_leg1.shape)
-theta_leg1 = np.array(theta_leg1)
-# print(theta_leg1.shape)
-degree = 300
-z = np.polyfit(theta_leg1, r_leg1, degree)
-poly = np.poly1d(z)
-theta = 0
-r_leg1_fit = []
-for i in range(201):
-    r = poly(theta_leg1[i])
-    x_leg_1_fit.append(r*math.cos(theta_leg1[i]))
-    y_leg_1_fit.append(r*math.sin(theta_leg1[i]))
-    r_leg1_fit.append(r)
-r_leg1_fit = np.array(r_leg1_fit)
-print('mean error: ',np.mean(np.abs(r_leg1 - r_leg1_fit)))
-# print(r_leg1_fit.shape)
 plt.figure()
 plt.plot(x_leg_1, y_leg_1)
-plt.plot(x_leg_1_fit, y_leg_1_fit)
-# plt.plot(taus, theta_leg1)
-# plt.plot(theta_leg1, r_leg1)
 plt.show()
+# print(theta)
+# r_leg1 = np.array(r_leg1)
+# # print(r_leg1.shape)
+# theta_leg1 = np.array(theta_leg1)
+# # print(theta_leg1.shape)
+# degree = 300
+# z = np.polyfit(theta_leg1, r_leg1, degree)
+# poly = np.poly1d(z)
+# theta = 0
+# r_leg1_fit = []
+# for i in range(201):
+#     r = poly(theta_leg1[i])
+#     x_leg_1_fit.append(r*math.cos(theta_leg1[i]))
+#     y_leg_1_fit.append(r*math.sin(theta_leg1[i]))
+#     r_leg1_fit.append(r)
+# r_leg1_fit = np.array(r_leg1_fit)
+# print('mean error: ',np.mean(np.abs(r_leg1 - r_leg1_fit)))
+# # print(r_leg1_fit.shape)
+# plt.figure()
+# plt.plot(x_leg_1, y_leg_1)
+# plt.plot(x_leg_1_fit, y_leg_1_fit)
+# # plt.plot(taus, theta_leg1)
+# # plt.plot(theta_leg1, r_leg1)
+# plt.show()
 
 
 # with open('leg.txt', 'w') as f1:

@@ -279,8 +279,8 @@ class WalkingController():
             if(0<= theta1 + theta2 <= 2*PI):
                 return theta1 + theta2
         #Spline reference action is a circle with 0.02 radius centered at 0, -0.17
-        
-        action = action + self._action_spline_ref
+        action_spline_ref = np.ones(action.size)*0.024
+        action = action + action_spline_ref
         #C0 continuity at the end
         action = np.append(action, action[0])
         n = action.size -1
@@ -304,7 +304,7 @@ class WalkingController():
             tau = (theta - 2*PI*idx/n) /(2*PI/n)
             y0 = action[idx]
             y1 = action[idx+1]
-            y_center = -0.17
+            y_center = -0.195
             if idx == 0 :
                 d0 = 0 # Slope at start-point is zero
             else:
@@ -317,14 +317,13 @@ class WalkingController():
 
             coeffts = spline_fit(y0, y1, d0, d1)
             leg.r = cubic_spline(coeffts, tau)
-            leg.x = leg.r * math.cos(leg.theta)
+            leg.x = -leg.r * math.cos(leg.theta)
             leg.y = leg.r * math.sin(leg.theta) + y_center
             leg.motor_knee, leg.motor_hip, _, _ = self._inverse_stoch2(leg.x, leg.y, self._leg)
             leg.motor_hip = leg.motor_hip + self.MOTOROFFSETS[0]
             leg.motor_knee = leg.motor_knee + self.MOTOROFFSETS[1]
         leg_motor_angles = [legs.front_right.motor_hip, legs.front_right.motor_knee, legs.front_left.motor_hip, legs.front_left.motor_knee,
         legs.back_right.motor_hip, legs.back_right.motor_knee, legs.back_left.motor_hip, legs.back_left.motor_knee]
-        # print("1: ", leg_motor_angles)
 
         return np.zeros(2),leg_motor_angles, np.zeros(2), np.zeros(8)
 

@@ -28,7 +28,7 @@ class Stoch2Env(gym.Env):
                  render = False,
                  on_rack = False,
                  gait = 'trot',
-                 phase = [PI,0,0,PI]):
+                 phase = [0,PI,PI,0]):
         
         self._is_render = render
         self._on_rack = on_rack
