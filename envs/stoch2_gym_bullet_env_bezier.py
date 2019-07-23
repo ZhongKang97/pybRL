@@ -27,12 +27,8 @@ class Stoch2Env(gym.Env):
     def __init__(self,
                  render = False,
                  on_rack = False,
-<<<<<<< HEAD
-                 gait = 'trot'):
-=======
                  gait = 'trot',
                  phase = [0,PI,PI,0]):
->>>>>>> 802a24d22563afc7bcb021379af6e3ee94c2da85
         
         self._is_render = render
         self._on_rack = on_rack
@@ -52,24 +48,14 @@ class Stoch2Env(gym.Env):
         self._n_steps = 0
         self._action_dim = 10
         # self._obs_dim = 7
-<<<<<<< HEAD
-        self._obs_dim = 10
-        # self._obs_dim = 4
-=======
-        self._obs_dim = 4
         self._obs_dim = 10
      
->>>>>>> 802a24d22563afc7bcb021379af6e3ee94c2da85
         self.action = np.zeros(self._action_dim)
         
         self._last_base_position = [0, 0, 0]
         self._distance_limit = float("inf")
 
         self._xpos_previous = 0.0
-<<<<<<< HEAD
-        #changed type to canter
-=======
->>>>>>> 802a24d22563afc7bcb021379af6e3ee94c2da85
         self._walkcon = walking_controller.WalkingController(gait_type=gait,
                                                              spine_enable = False,
                                                              planning_space = 'polar_task_space',
@@ -367,16 +353,7 @@ class Stoch2Env(gym.Env):
     def GetObservation(self):
         observation = []
         # pos, ori = self.GetBasePosAndOrientation()
-<<<<<<< HEAD
         angles = self.GetMotorAngles()
-=======
-        
-        #Using only few of the angles
-        angles = self.GetMotorAnglesObs()
-        #Using all angles
-        angles = self.GetMotorAngles()
-
->>>>>>> 802a24d22563afc7bcb021379af6e3ee94c2da85
 #         observation.extend(list(pos))
 #         observation.extend(self.GetMotorAngles().tolist())
 #         observation.extend(self.GetMotorVelocities().tolist())
@@ -412,16 +389,9 @@ class Stoch2Env(gym.Env):
         # print('rpy afer: ', rpy)
         # print('ori after: ', ori)
         # return np.concatenate([pos,ori]).ravel()
-<<<<<<< HEAD
         # return np.concatenate([ori]).ravel()
         angles = self.GetMotorAngles()
         #10 degree noise
-=======
-      
-        angles = self.GetMotorAnglesObs()
-        angles = self.GetMotorAngles()
-
->>>>>>> 802a24d22563afc7bcb021379af6e3ee94c2da85
         return np.concatenate([angles]).ravel()
 
 

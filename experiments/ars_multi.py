@@ -12,7 +12,7 @@ import time
 import multiprocessing as mp
 from multiprocessing import Process, Pipe
 import argparse
-
+import math
 #Utils
 from pybRL.utils.logger import DataLog
 from pybRL.utils.make_train_plots import make_train_plots_ars
@@ -24,6 +24,8 @@ from gym.envs.registration import registry, register, make, spec
 import pybullet as p 
 import numpy as np
 import pybRL.envs.stoch2_gym_bullet_env_normal as sv
+
+PI = math.pi
 # Setting the Hyper Parameters
 class HyperParameters():
     """
@@ -321,7 +323,7 @@ if __name__ == "__main__":
 
   args = parser.parse_args()
   # #Custom environments that you want to use ----------------------------------------------------------------------------------------
-  register(id='Stoch2-v0',entry_point='pybRL.envs.stoch2_gym_bullet_env_bezier:Stoch2Env', kwargs = {'gait' : args.gait} )
+  register(id='Stoch2-v0',entry_point='pybRL.envs.stoch2_gym_bullet_env_bezier:Stoch2Env', kwargs = {'phase' : [0, PI, PI, 0]} )
   register(id='Stoch2-v3',entry_point='pybRL.envs.stoch2_gym_bullet_env_bezier_stairs:Stoch2Env')
   register(id='Stoch2-v4',entry_point='pybRL.envs.stoch2_gym_bullet_env_bezier_stairs_kartik:Stoch2Env')
   register(id='Stoch2-v1',entry_point='pybRL.envs.stoch2_gym_bullet_env_normal:StochBulletEnv', 
