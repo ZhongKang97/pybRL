@@ -57,6 +57,8 @@ normalizer = Normalizer(nb_inputs)
 logger = DataLog()
 i = 0
 policy = np.load(path)
+np.save(os.path.realpath('../..') + '/pybRL/sim2real/ARS_matrix.npy', policy)
+exit()
 print(policy)
 total_reward = 0
 states = []
@@ -65,7 +67,7 @@ states = []
 while i<100:
     action = np.clip(policy.dot(state), -1, 1)
     state, reward, done, info = env.step(action)
-
+    states.append(state)
     # env.step(env.action_space.sample())
     # print(reward)
     total_reward = total_reward + reward

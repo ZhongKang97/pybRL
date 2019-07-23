@@ -12,7 +12,7 @@ import time
 import pybullet
 import pybRL.envs.bullet_client as bullet_client
 import pybullet_data
-
+import matplotlib.pyplot as plt
 INIT_POSITION = [0, 0, 0.29] 
 INIT_ORIENTATION = [0, 0, 0, 1]
 LEG_POSITION = ["fl_", "bl_", "fr_", "br_"]
@@ -20,13 +20,19 @@ KNEE_CONSTRAINT_POINT_RIGHT = [0.014, 0, 0.076] #hip
 KNEE_CONSTRAINT_POINT_LEFT = [0.0,0.0,-0.077] #knee
 RENDER_HEIGHT = 720 #360
 RENDER_WIDTH = 960 #480 
+PI = math.pi
 
 class Stoch2Env(gym.Env):
     
     def __init__(self,
                  render = False,
                  on_rack = False,
+<<<<<<< HEAD
                  gait = 'trot'):
+=======
+                 gait = 'trot',
+                 phase = [0,PI,PI,0]):
+>>>>>>> 802a24d22563afc7bcb021379af6e3ee94c2da85
         
         self._is_render = render
         self._on_rack = on_rack
@@ -38,29 +44,38 @@ class Stoch2Env(gym.Env):
         self._theta = 0
         self._theta0 = 0
         self._update_action_every = 1.  # update is every 50% of the step i.e., theta goes from 0 to pi/2
-        self._frequency = 1.
+        self._frequency = 1. #change back to 1
         self._kp = 20
-        self._kd = 2.0
+        self._kd = 2
         self.dt = 0.001
         self._frame_skip = 5
         self._n_steps = 0
-        
         self._action_dim = 10
         # self._obs_dim = 7
+<<<<<<< HEAD
         self._obs_dim = 10
         # self._obs_dim = 4
+=======
+        self._obs_dim = 4
+        self._obs_dim = 10
+     
+>>>>>>> 802a24d22563afc7bcb021379af6e3ee94c2da85
         self.action = np.zeros(self._action_dim)
         
         self._last_base_position = [0, 0, 0]
         self._distance_limit = float("inf")
 
         self._xpos_previous = 0.0
+<<<<<<< HEAD
         #changed type to canter
+=======
+>>>>>>> 802a24d22563afc7bcb021379af6e3ee94c2da85
         self._walkcon = walking_controller.WalkingController(gait_type=gait,
                                                              spine_enable = False,
                                                              planning_space = 'polar_task_space',
                                                              left_to_right_switch = True,
-                                                             frequency=self._frequency)
+                                                             frequency=self._frequency,
+                                                             phase=phase)
         
         self._cam_dist = 1.0
         self._cam_yaw = 0.0
@@ -165,8 +180,7 @@ class Stoch2Env(gym.Env):
         return self.GetObservationReset()
     
     def step(self, action, callback=None):
-        energy_spent_per_step, cost_reference = self.do_simulation(action, n_frames = self._frame_skip, callback=callback)
-
+        energy_spent_per_step, cost_reference, ang_data = self.do_simulation(action, n_frames = self._frame_skip, callback=callback)
         ob = self.GetObservation()
         ## calculate reward here
         reward,done,penalty = self._get_reward(action,energy_spent_per_step,cost_reference)
@@ -174,8 +188,9 @@ class Stoch2Env(gym.Env):
         if done:
             self.reset()
 
-        return ob, reward, done, dict(reward_run=reward, reward_ctrl=-penalty)
-    
+        # return ob, reward, done, dict(reward_run=reward, reward_ctrl=-penalty) 
+        return ob, reward, done, ang_data
+
     def do_simulation(self, action, n_frames, callback=None):
         omega = 2 * math.pi * self._frequency
         self._theta = self._theta0
@@ -184,13 +199,21 @@ class Stoch2Env(gym.Env):
         #print(action)
         self.action = action
         cost_reference = 0
-        
+        ii = 0
+        angle_data = []
+        x1 = []
+        y1 = []
+        x2 = []
+        y2 = []
         while(self._theta - self._theta0 <= math.pi * self._update_action_every and not self._theta >= 2 * math.pi):
 
             theta = self._theta
             
-            spine_des, leg_m_angle_cmd, d_spine_des, leg_m_vel_cmd = self._walkcon.transform_action_to_motor_joint_command(theta,action)
+            # spine_des, leg_m_angle_cmd, d_spine_des, leg_m_vel_cmd = self._walkcon.transform_action_to_motor_joint_command(theta,action)
+            # spine_des, leg_m_angle_cmd, d_spine_des, leg_m_vel_cmd = self._walkcon.transform_action_to_motor_joint_command2(theta,action) 
+            spine_des, leg_m_angle_cmd, d_spine_des, leg_m_vel_cmd= self._walkcon.transform_action_to_motor_joint_command3(theta,action)   
             self._theta = (omega * self.dt + theta)
+            # self._theta = theta + 2*PI/100
             
 #             if  p_index==0:
             qpos_act = np.array(self.GetMotorAngles())
@@ -207,9 +230,11 @@ class Stoch2Env(gym.Env):
             m_vel_cmd_ext[[0,5]] = d_spine_des
 
             for _ in range(n_frames):
+                current_angle_data = np.concatenate(([ii],self.GetMotorAngles()))
+                angle_data.append(current_angle_data)
+                ii = ii + 1
                 applied_motor_torque = self._apply_pd_control(m_angle_cmd_ext, m_vel_cmd_ext)
                 self._pybullet_client.stepSimulation()
-                
                 joint_power = np.multiply(applied_motor_torque, self.GetMotorVelocities()) # Power output of individual actuators
                 joint_power[ joint_power < 0.0] = 0.0 # Zero all the negative power terms
                 energy_spent = np.sum(joint_power) * self.dt/n_frames
@@ -223,7 +248,7 @@ class Stoch2Env(gym.Env):
 
         self._theta0 = self._theta % (2* math.pi)
         self._n_steps += 1
-        return energy_spent_per_step, cost_reference
+        return energy_spent_per_step, cost_reference, angle_data
   
     def render(self, mode="rgb_array", close=False):
         if mode != "rgb_array":
@@ -342,7 +367,16 @@ class Stoch2Env(gym.Env):
     def GetObservation(self):
         observation = []
         # pos, ori = self.GetBasePosAndOrientation()
+<<<<<<< HEAD
         angles = self.GetMotorAngles()
+=======
+        
+        #Using only few of the angles
+        angles = self.GetMotorAnglesObs()
+        #Using all angles
+        angles = self.GetMotorAngles()
+
+>>>>>>> 802a24d22563afc7bcb021379af6e3ee94c2da85
 #         observation.extend(list(pos))
 #         observation.extend(self.GetMotorAngles().tolist())
 #         observation.extend(self.GetMotorVelocities().tolist())
@@ -378,9 +412,16 @@ class Stoch2Env(gym.Env):
         # print('rpy afer: ', rpy)
         # print('ori after: ', ori)
         # return np.concatenate([pos,ori]).ravel()
+<<<<<<< HEAD
         # return np.concatenate([ori]).ravel()
         angles = self.GetMotorAngles()
         #10 degree noise
+=======
+      
+        angles = self.GetMotorAnglesObs()
+        angles = self.GetMotorAngles()
+
+>>>>>>> 802a24d22563afc7bcb021379af6e3ee94c2da85
         return np.concatenate([angles]).ravel()
 
 
@@ -564,6 +605,6 @@ class Stoch2Env(gym.Env):
 
 
 if(__name__ == "__main__"):
-    env = Stoch2Env()
-    state = env.reset()
-    print(state)
+    env = Stoch2Env(render=True)
+    for i in range(10):
+        env.step(np.array([0,0,0,0,0,0,0,0,0,0]))
