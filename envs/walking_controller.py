@@ -160,7 +160,7 @@ class WalkingController():
         #leg_motor_angle,leg_motor_vel = j_ang, j_vel
         leg_m_angle_cmd = self._spread_motor_commands(leg_motor_angle)
         leg_m_vel_cmd = self._spread_motor_commands(leg_motor_vel)
-        # print('1: ',leg_m_angle_cmd)
+        print('1: ',leg_m_angle_cmd)
         return spine_m_angle_cmd, leg_m_angle_cmd, spine_m_vel_cmd, leg_m_vel_cmd
     
     def transform_action_to_motor_joint_command2(self, theta, action):
@@ -186,8 +186,8 @@ class WalkingController():
             else:
                 tau = theta0/ PI
                 stance_leg = 0
-            action_ref = self._extend_leg_action_space_for_hzd(tau,action)
-            r_and_theta, dr_dtheta = self._transform_action_to_r_and_theta_via_bezier_polynomials(tau, stance_leg, action_ref)
+            action_ref = self._extend_leg_action_space_for_hzd2(tau,action)
+            r_and_theta = self._transform_action_to_r_and_theta_via_bezier_polynomials2(tau, stance_leg, action_ref)
             xy = np.zeros(2)
             rt = np.zeros(2)
             y_center = -0.17
@@ -244,8 +244,27 @@ class WalkingController():
 
         leg_motor_angles = [legs['front-right']['motor-hip'],legs['front-right']['motor-knee'],legs['front-left']['motor-hip'],legs['front-left']['motor-knee'],
         legs['back-right']['motor-hip'],legs['back-right']['motor-knee'],legs['back-left']['motor-hip'],legs['back-left']['motor-knee']]
-        # print('2: ',leg_motor_angles)
+        print('2: ',leg_motor_angles)
         return np.zeros(2), leg_motor_angles , np.zeros(2), np.zeros(8)
+
+    def transform_action_to_motor_joint_command3(self, theta, action):
+        phase = self.phase
+        legs = {'front-left':{}, 'front-right':{}, 'back-left':{} , 'back-right':{}}
+        def add_phase(angle, phase):
+            if (-PI <= angle + phase <= PI):
+                return angle + phase
+            if(angle + phase > PI):
+                return angle + phase - 2*PI
+            if(angle + phase < -PI):
+                return angle + phase + 2*PI
+        
+        if theta > PI:
+            tau = (theta - PI)/PI  # as theta varies from pi to 2 pi, tau varies from 0 to 1    
+            stance_leg = 1 # for 0 to pi, stance leg is left leg. (note robot behavior sometimes is erratic, so stance leg is not explicitly seen)
+        else:
+            tau = theta / PI  # as theta varies from 0 to pi, tau varies from 0 to 1    
+            stance_leg = 0 # for pi to 2 pi stance leg is right leg.
+
 
     def _Bezier_polynomial(self,tau,nTraj):
         Phi = np.zeros(4*nTraj)
@@ -294,6 +313,20 @@ class WalkingController():
 
             action_ref[8:] = action_ref[:8]
 #         print('action_ref',action_ref)    
+        return action_ref
+    
+    def _extend_leg_action_space_for_hzd2(self,tau,action):
+        action_ref = np.zeros(8)
+        action_ref[[2,3,6,7]] = self._action_ref[[2,3,6,7]] + action[[1,2,3,4]]
+
+        if self._left_to_right_switch:
+            # 0 = 11, 4 = 15, 8 = 3
+            # hybrid zero dynamics based coefficients are defined here, some of the action values are reassigned
+            action_ref[0] = self._action_ref[0] # r of left leg is matched with r of right leg
+            action_ref[4] = self._action_ref[4] # theta of left leg is matched with theta of right leg
+            action_ref[1] = 6 * self._action_ref[0] - self._action_ref[10] # rdot of one leg is matched with rdot of opposite leg
+            action_ref[5] = 6 * self._action_ref[4] - self._action_ref[14] # thetadot of one leg is matched with thetadot of opposite leg
+
         return action_ref
         
     def _extend_spine_action_space_for_hzd(self,tau,action):
@@ -368,6 +401,42 @@ class WalkingController():
             drdt[i] = omega/PI*np.dot(Weight_ac[4*i:4*i+4],dPhidt[4*i:4*i+4])*self._RT_SCALINGFACTOR[i % 2] 
 
         return rt, drdt
+    
+    def _transform_action_to_r_and_theta_via_bezier_polynomials2(self, tau, stance_leg, action):
+
+        rt = np.zeros(2)
+        Weight_ac = np.zeros(16)
+        
+        if self._left_to_right_switch:
+            # if stance_leg == 0:
+            #     Weight_ac = action  # the first half of the action the values are for stance leg
+            # else:
+            #     Weight_ac[0:8] = action[8:16]
+            #     Weight_ac[8:16] = action[0:8]
+            Weight_ac = action  # the first half of the action the values are for stance leg
+
+        else:
+            Weight_ac = action  # the first half of the action the values are for stance leg
+
+        Phi = self._Bezier_polynomial(tau,2)
+        
+        # if not self._left_to_right_switch:
+        #     tau_aux = (tau + 0.5) % 1
+        #     Phi_aux = self._Bezier_polynomial(tau_aux,4)
+        #     dPhidt_aux = self._Bezier_polynomial_derivative(tau_aux,4)
+            
+        #     for i in range(2):
+        #         Phi[4*(i+2):4*(i+2)+4] = Phi_aux[4*i:4*i+4]
+        #         dPhidt[4*(i+2):4*(i+2)+4] = dPhidt_aux[4*i:4*i+4]
+                
+        # for i in range(4):
+        #     rt[i] = np.dot(Weight_ac[4*i:4*i+4],Phi[4*i:4*i+4])*self._RT_SCALINGFACTOR[i % 2] + self._RT_OFFSET[i % 2] 
+        #     drdt[i] = omega/PI*np.dot(Weight_ac[4*i:4*i+4],dPhidt[4*i:4*i+4])*self._RT_SCALINGFACTOR[i % 2] 
+        
+        rt[0] = np.dot(Weight_ac[0:4],Phi[0:4])*self._RT_SCALINGFACTOR[0] + self._RT_OFFSET[0]
+        rt[1] = np.dot(Weight_ac[4:8],Phi[4:8])*self._RT_SCALINGFACTOR[1] + self._RT_OFFSET[1]
+
+        return rt
 
     def _transform_action_to_xy_via_bezier_polynomials(self, tau, stance_leg, action):
 
@@ -899,7 +968,7 @@ class Stoch2Kinematics(object):
 
 if(__name__ == "__main__"):
     action = np.array([ 0.24504616, -0.11582746,  0.71558934, -0.46091432, -0.36284493,  0.00495828, -0.06466855, -0.45247894,  0.72117291, -0.11068088])
-    walkcon = WalkingController(planning_space="polar_task_space")
+    walkcon = WalkingController(planning_space="polar_task_space", phase=[PI,0,0,PI])
     theta = 0
     leg2s =[]
     legs =[]
@@ -908,7 +977,7 @@ if(__name__ == "__main__"):
         s, leg, _, _ = walkcon.transform_action_to_motor_joint_command(theta, action)
         leg2s.append(leg2)
         legs.append(leg)
-        theta = theta + PI/1000
+        theta = theta + PI/10
     leg2s = np.array(leg2)
     legs = np.array(legs)
     print(np.mean(np.abs(leg2s - legs)))
