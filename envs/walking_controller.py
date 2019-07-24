@@ -279,6 +279,8 @@ class WalkingController():
             if(0<= theta1 + theta2 <= 2*PI):
                 return theta1 + theta2
         #Spline reference action is a circle with 0.02 radius centered at 0, -0.17
+        #Normalize action varying from -1 to 1 to -0.024 to 0.024
+        action = action * 0.024
         action_spline_ref = np.ones(action.size)*0.024
         action = action + action_spline_ref
         #C0 continuity at the end
@@ -301,7 +303,7 @@ class WalkingController():
         count = 0
         for leg in legs:
             idx = int((leg.theta - 1e-4)*n/(2*PI))
-            tau = (theta - 2*PI*idx/n) /(2*PI/n)
+            tau = (leg.theta - 2*PI*idx/n) /(2*PI/n)
             y0 = action[idx]
             y1 = action[idx+1]
             y_center = -0.195
@@ -325,8 +327,7 @@ class WalkingController():
         leg_motor_angles = [legs.front_right.motor_hip, legs.front_right.motor_knee, legs.front_left.motor_hip, legs.front_left.motor_knee,
         legs.back_right.motor_hip, legs.back_right.motor_knee, legs.back_left.motor_hip, legs.back_left.motor_knee]
 
-        return np.zeros(2),leg_motor_angles, np.zeros(2), np.zeros(8)
-
+        return np.zeros(2),leg_motor_angles, np.zeros(2), np.zeros(8) 
     def _Bezier_polynomial(self,tau,nTraj):
         Phi = np.zeros(4*nTraj)
         for i in range(nTraj):
@@ -1033,12 +1034,17 @@ if(__name__ == "__main__"):
     walkcon = WalkingController(planning_space="polar_task_space", phase=[PI,0,0,PI])
     theta = 0
     action = np.zeros(10)
-    x_1 = []
-    y_1 = []
+    action = (np.array([0.02505827, 0.02429368, 0.02302543, 0.02367982, 0.02349182, 0.02434083,
+ 0.02467802, 0.02330308, 0.02460212, 0.02392253]) - np.ones(10)*0.024 ) * 1/0.024
+
+    x1 = []
+    y1 = []
     while(theta < 2*PI):
-        _ , leg_motor_angles, _, _ = walkcon.transform_action_to_motor_joint_command3(theta, action)
-        theta = theta + 2*PI/10
+        _ , leg_motor_angles, _, _, data = walkcon.transform_action_to_motor_joint_command3(theta, action)
+        x1.append(data[0])
+        y1.append(data[1])
+        theta = theta + 2*PI/100
     
-    # plt.figure()
-    # plt.plot(x_1, y_1)
-    # plt.show()
+#     plt.figure()
+#     plt.plot(x1, y1)
+#     plt.show()

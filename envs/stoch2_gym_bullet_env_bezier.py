@@ -166,6 +166,7 @@ class Stoch2Env(gym.Env):
         return self.GetObservationReset()
     
     def step(self, action, callback=None):
+        action = np.clip(action, -1, 1)
         energy_spent_per_step, cost_reference, ang_data = self.do_simulation(action, n_frames = self._frame_skip, callback=callback)
         ob = self.GetObservation()
         ## calculate reward here
@@ -578,3 +579,8 @@ if(__name__ == "__main__"):
     env = Stoch2Env(render=True)
     for i in range(10):
         env.step(np.array([0,0,0,0,0,0,0,0,0,0]))
+#         env.step(np.array( [ 0.06778296, -0.01940124, -0.01924977, -0.00751148, -0.03500922,  0.01891797,
+#  -0.02483966, -0.01901164, -0.01536581,  0.01925358]))
+        #Normalize action space between -0.024 to +0.024
+#         env.step(np.array([ 0.04409455,  0.01223679, -0.04060704, -0.01334077, -0.02117415,  0.01420131,
+#   0.02825101, -0.02903829,  0.02508816, -0.00322808]))
