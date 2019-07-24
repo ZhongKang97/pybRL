@@ -328,11 +328,7 @@ if __name__ == "__main__":
 
   args = parser.parse_args()
   # #Custom environments that you want to use ----------------------------------------------------------------------------------------
-<<<<<<< HEAD
-  register(id='Stoch2-v0',entry_point='pybRL.envs.stoch2_gym_bullet_env_bezier:Stoch2Env', kwargs = {'phase' : [0, PI, PI, 0]} )
-=======
   register(id='Stoch2-v0',entry_point='pybRL.envs.stoch2_gym_bullet_env_bezier:Stoch2Env', kwargs = {'gait' : args.gait, 'phase': [0, PI, PI, 0]} )
->>>>>>> 41bc0ea497d4abcf0e9d6ecf8f93b6631c289bd7
   register(id='Stoch2-v3',entry_point='pybRL.envs.stoch2_gym_bullet_env_bezier_stairs:Stoch2Env')
   register(id='Stoch2-v4',entry_point='pybRL.envs.stoch2_gym_bullet_env_bezier_stairs_kartik:Stoch2Env')
   register(id='Stoch2-v1',entry_point='pybRL.envs.stoch2_gym_bullet_env_normal:StochBulletEnv', 
