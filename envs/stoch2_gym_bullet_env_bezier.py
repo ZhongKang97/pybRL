@@ -49,11 +49,7 @@ class Stoch2Env(gym.Env):
         self._action_dim = 10
         # self._obs_dim = 7
         self._obs_dim = 10
-<<<<<<< HEAD
      
-=======
-        # self._obs_dim = 4
->>>>>>> 41bc0ea497d4abcf0e9d6ecf8f93b6631c289bd7
         self.action = np.zeros(self._action_dim)
         
         self._last_base_position = [0, 0, 0]
