@@ -27,6 +27,8 @@ import pybRL.envs.stoch2_gym_bullet_env_normal as sv
 
 PI = math.pi
 # Setting the Hyper Parameters
+import math
+PI = math.pi
 class HyperParameters():
     """
     This class is basically a struct that contains all the hyperparameters that you want to tune
@@ -187,10 +189,13 @@ def explore(env, policy, direction, delta, hp):
     # normalizer.observe(state)
     # state = normalizer.normalize(state)
     action = policy.evaluate(state, delta, direction, hp)
+    print("action : ", action)
     state, reward, done, _ = env.step(action)
+    print("reward: ", reward)
     # reward = max(min(reward, 1), -1)
     sum_rewards += reward
     num_plays += 1
+  print("sum rewards: ", sum_rewards)
   return sum_rewards
 
 
@@ -323,7 +328,11 @@ if __name__ == "__main__":
 
   args = parser.parse_args()
   # #Custom environments that you want to use ----------------------------------------------------------------------------------------
+<<<<<<< HEAD
   register(id='Stoch2-v0',entry_point='pybRL.envs.stoch2_gym_bullet_env_bezier:Stoch2Env', kwargs = {'phase' : [0, PI, PI, 0]} )
+=======
+  register(id='Stoch2-v0',entry_point='pybRL.envs.stoch2_gym_bullet_env_bezier:Stoch2Env', kwargs = {'gait' : args.gait, 'phase': [0, PI, PI, 0]} )
+>>>>>>> 41bc0ea497d4abcf0e9d6ecf8f93b6631c289bd7
   register(id='Stoch2-v3',entry_point='pybRL.envs.stoch2_gym_bullet_env_bezier_stairs:Stoch2Env')
   register(id='Stoch2-v4',entry_point='pybRL.envs.stoch2_gym_bullet_env_bezier_stairs_kartik:Stoch2Env')
   register(id='Stoch2-v1',entry_point='pybRL.envs.stoch2_gym_bullet_env_normal:StochBulletEnv', 
