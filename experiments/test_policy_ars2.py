@@ -49,7 +49,7 @@ env = e2.Stoch2Env(render = True, gait = 'trot')
 # path = '/home/sashank/mjrl-master/pybRL/experiments/policy_MinitaurTrottingEnv-v0_20190522-110536.npy'
 # path = '/home/abhik/pybRL/experiments/Stoch2_ARS_1/iterations/best_policy.npy'
 #'/pybRL/experiments/Stoch2_Jun14_9/iterations/policy_10.npy'
-path = '/pybRL/experiments/sashu_canter_1/iterations/best_policy.npy'
+path = '/pybRL/experiments/spline/Jul24_3/iterations/best_policy.npy'
 path = os.path.realpath('../..') + path
 state = env.reset()
 nb_inputs = env.observation_space.sample().shape[0]
@@ -57,8 +57,8 @@ normalizer = Normalizer(nb_inputs)
 logger = DataLog()
 i = 0
 policy = np.load(path)
-np.save(os.path.realpath('../..') + '/pybRL/sim2real/ARS_matrix.npy', policy)
-exit()
+# np.save(os.path.realpath('../..') + '/pybRL/sim2real/ARS_matrix.npy', policy)
+# exit()
 print(policy)
 total_reward = 0
 states = []
