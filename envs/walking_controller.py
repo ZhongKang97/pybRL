@@ -857,15 +857,6 @@ class WalkingController():
         
         return xy
 
-    def _generate_spline_ref(self, size, limit_radius, limit_thetas):
-        spline_ref = np.zeros(size)
-        for i in range(spline_ref.size):
-            theta = i*(PI/size)
-            idx = np.abs(theta - limit_thetas).argmin()
-            spline_ref[i] = limit_radius[idx]
-        
-        return spline_ref 
-
     
 ######## IK Stuff #####
 class Serial2RKin():
