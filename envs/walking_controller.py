@@ -280,9 +280,17 @@ class WalkingController():
                 return theta1 + theta2
         #Spline reference action is a circle with 0.02 radius centered at 0, -0.17
         #Normalize action varying from -1 to 1 to -0.024 to 0.024
-        action = action * 0.024
-        action_spline_ref = np.ones(action.size)*0.024
-        action = action + action_spline_ref
+        # action = action * 0.024
+        # action_spline_ref = np.ones(action.size)*0.024
+        mul_ref = np.array([0.08233419, 0.07341638, 0.04249794, 0.04249729, 0.07341638, 0.08183298,0.07368498, 0.04149645, 0.04159619, 0.07313576])
+        # action = 
+        # action = action + action_spline_ref
+        
+        # TO ensure only forward motion
+        action = np.abs(action)
+        # Only works if action size is 10, doesnt search the entire feasible space, see spline_space to understand
+        action = np.multiply_ref(action, multiply_ref)
+
         #C0 continuity at the end
         action = np.append(action, action[0])
         n = action.size -1
@@ -848,6 +856,15 @@ class WalkingController():
         _, xy[2:4] = self.ik_leg.forwardKinematics(q_fr-self.MOTOROFFSETS)
         
         return xy
+
+    def _generate_spline_ref(self, size, limit_radius, limit_thetas):
+        spline_ref = np.zeros(size)
+        for i in range(spline_ref.size):
+            theta = i*(PI/size)
+            idx = np.abs(theta - limit_thetas).argmin()
+            spline_ref[i] = limit_radius[idx]
+        
+        return spline_ref 
 
     
 ######## IK Stuff #####
