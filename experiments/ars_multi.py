@@ -33,7 +33,7 @@ class HyperParameters():
     """
     This class is basically a struct that contains all the hyperparameters that you want to tune
     """
-    def __init__(self,forward_reward_cap = 1, normal = True, msg = '', nb_steps=10000, episode_length=1000, learning_rate=0.02, nb_directions=16, nb_best_directions=8, noise=0.03, seed=1, env_name='HalfCheetahBulletEnv-v0', energy_weight = 0.2):
+    def __init__(self,forward_reward_cap = 1, normal = True,gait = 'trot' ,msg = '', nb_steps=10000, episode_length=1000, learning_rate=0.02, nb_directions=16, nb_best_directions=8, noise=0.03, seed=1, env_name='HalfCheetahBulletEnv-v0', energy_weight = 0.2):
         self.nb_steps = nb_steps
         self.episode_length = episode_length
         self.learning_rate = learning_rate
@@ -47,7 +47,7 @@ class HyperParameters():
         self.normal = normal
         self.msg = msg
         self.forward_reward_cap = forward_reward_cap
-    
+        self.gait = gait
     def to_text(self, path):
         res_str = ''
         res_str = res_str + 'learning_rate: ' + str(self.learning_rate) + '\n'
@@ -58,6 +58,7 @@ class HyperParameters():
         res_str = res_str + 'direction ratio: '+ str(self.nb_directions/ self.nb_best_directions) + '\n'
         res_str = res_str + 'Normal initialization: '+ str(self.normal) + '\n'
         res_str = res_str + 'Forward reward cap: '+ str(self.forward_reward_cap) + '\n'
+        res_str = res_str + 'Gait: '+ str(self.gait) + '\n'
         res_str = res_str + self.msg + '\n'
         fileobj = open(path, 'w')
         fileobj.write(res_str)
@@ -366,6 +367,7 @@ if __name__ == "__main__":
   hp.nb_directions = int(env.observation_space.sample().shape[0] * env.action_space.sample().shape[0])
   hp.nb_best_directions = int(hp.nb_directions / 2)
   hp.normal = args.normal
+  hp.gait = args.gait
   # print('number directions: ', hp.nb_directions)
   # print('number best directions: ', hp.nb_best_directions)
   # exit()

@@ -340,8 +340,10 @@ class Stoch2Env(gym.Env):
 #         foot_clearance_reward = 0.5 * np.exp(-2*(0.23 - rt_mid[0])**2) + 0.5 * np.exp(-2*(0.18 - rt_mid[2])**2)
 #         stride_length_reward = 0.5 * np.exp(-10*(1.0 - (rt_start[1] - rt_start[3]))**2) + 0.1 * np.exp(-10*(0.0 - (rt_mid[1] - rt_mid[3]))**2)
         
-        reward = distance_travelled - penalty - 0.01 * energy_spent_per_step + 0.5 * costreference_reward #+ walking_height_reward + foot_clearance_reward + stride_length_reward# + walking_velocity_reward
+        # reward = distance_travelled - penalty - 0.01 * energy_spent_per_step + 0.5 * costreference_reward #+ walking_height_reward + foot_clearance_reward + stride_length_reward# + walking_velocity_reward
         # print('reward being returned in function: ', reward)
+        #REMOVED PENALTIES TO LEARN OTHER GAITS
+        reward = distance_travelled - 0.01 * energy_spent_per_step #+ walking_height_reward + foot_clearance_reward + stride_length_reward# + walking_velocity_reward
         return reward, done, penalty
 
     def _apply_pd_control(self, motor_commands, motor_vel_commands):

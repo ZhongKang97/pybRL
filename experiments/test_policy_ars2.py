@@ -20,7 +20,7 @@ import pybRL.envs.stoch2_gym_bullet_env_bezier_stairs_kartik as e4
 import pybullet as p
 import numpy as np
 import time
-
+PI = np.pi
 class Normalizer():
 
   def __init__(self, nb_inputs):
@@ -44,12 +44,16 @@ class Normalizer():
 # p.connect(p.GUI)
 # env = e.MinitaurTrottingEnv(render=True)
 # env = e.StochBulletEnv(render = True, gait = 'trot', energy_weight= 0.000 )
-env = e2.Stoch2Env(render = True, gait = 'trot')
+walk = [0, PI, PI/2, 3*PI/2]
+canter = [0, PI, 0, PI]
+bound = [0, 0, PI, PI]
+trot = [0, PI, PI , 0]
+env = e2.Stoch2Env(render = True, phase = walk)
 # env = e4.Stoch2Env(render = True)
 # path = '/home/sashank/mjrl-master/pybRL/experiments/policy_MinitaurTrottingEnv-v0_20190522-110536.npy'
 # path = '/home/abhik/pybRL/experiments/Stoch2_ARS_1/iterations/best_policy.npy'
 #'/pybRL/experiments/Stoch2_Jun14_9/iterations/policy_10.npy'
-path = '/pybRL/experiments/spline/Jul24_3/iterations/best_policy.npy'
+path = '/pybRL/experiments/spline/Jul25_1/iterations/best_policy.npy'
 path = os.path.realpath('../..') + path
 state = env.reset()
 nb_inputs = env.observation_space.sample().shape[0]
@@ -64,8 +68,9 @@ total_reward = 0
 states = []
 # action = np.array([ 0.24504616, -0.11582746,  0.71558934, -0.46091432, -0.36284493,  0.00495828,
 #  -0.06466855, -0.45247894,  0.72117291, -0.11068088])
-while i<100:
+while i<10:
     action = np.clip(policy.dot(state), -1, 1)
+    action = np.zeros(10)
     state, reward, done, info = env.step(action)
     states.append(state)
     # env.step(env.action_space.sample())
@@ -79,7 +84,6 @@ while i<100:
     # logger.log_kv('y_leg2', info['ypos'][1])
 
     # time.sleep(1./30.)
-print(states)
-print(total_reward/1000)
+print(total_reward)
 
 # plotter.plot_traj(logger, ['x_leg1', 'x_leg2'], ['y_leg1', 'y_leg2'], ['Leg1 Trajectory, rep:5', 'Leg2 Trajectory, rep:5'], save_loc= './')

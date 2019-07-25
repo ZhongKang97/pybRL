@@ -64,7 +64,7 @@ for pt in y:
     count = count + 1
 
 center = [0, -0.195]
-radius = 0.048
+radius = 0.042
 thetas = np.arange(0, 2*np.pi, 0.001)
 x_circ = np.zeros(thetas.size)
 y_circ = np.zeros(thetas.size)
@@ -93,7 +93,7 @@ np.save("stoch2/ik_check_radius", final_radius)
 
 action = np.ones(10)
 mul_ref, pts = _generate_spline_ref(action.size, final_radius, final_thetas)
-action = np.multiply(action, mul_ref)
+action = np.multiply(action, mul_ref) * 0.5
 print(mul_ref)
 action = np.append(action, action[0])
 print(action)

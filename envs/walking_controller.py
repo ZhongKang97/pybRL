@@ -281,15 +281,11 @@ class WalkingController():
         #Spline reference action is a circle with 0.02 radius centered at 0, -0.17
         #Normalize action varying from -1 to 1 to -0.024 to 0.024
         # action = action * 0.024
-        # action_spline_ref = np.ones(action.size)*0.024
         mul_ref = np.array([0.08233419, 0.07341638, 0.04249794, 0.04249729, 0.07341638, 0.08183298,0.07368498, 0.04149645, 0.04159619, 0.07313576])
-        # action = 
-        # action = action + action_spline_ref
+        action = np.multiply(action, mul_ref) * 0.5
+        action_spline_ref = np.multiply(np.ones(action.size),mul_ref) * 0.5
+        action = action + action_spline_ref
         
-        # TO ensure only forward motion
-        action = np.abs(action)
-        # Only works if action size is 10, doesnt search the entire feasible space, see spline_space to understand
-        action = np.multiply(action, mul_ref)
 
         #C0 continuity at the end
         action = np.append(action, action[0])
