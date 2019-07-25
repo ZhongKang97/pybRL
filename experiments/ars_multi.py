@@ -12,7 +12,7 @@ import time
 import multiprocessing as mp
 from multiprocessing import Process, Pipe
 import argparse
-
+import math
 #Utils
 from pybRL.utils.logger import DataLog
 from pybRL.utils.make_train_plots import make_train_plots_ars
@@ -24,6 +24,8 @@ from gym.envs.registration import registry, register, make, spec
 import pybullet as p 
 import numpy as np
 import pybRL.envs.stoch2_gym_bullet_env_normal as sv
+
+PI = math.pi
 # Setting the Hyper Parameters
 import math
 PI = math.pi
@@ -187,13 +189,13 @@ def explore(env, policy, direction, delta, hp):
     # normalizer.observe(state)
     # state = normalizer.normalize(state)
     action = policy.evaluate(state, delta, direction, hp)
-    print("action : ", action)
+    # print("action : ", action)
     state, reward, done, _ = env.step(action)
-    print("reward: ", reward)
+    # print("reward: ", reward)
     # reward = max(min(reward, 1), -1)
     sum_rewards += reward
     num_plays += 1
-  print("sum rewards: ", sum_rewards)
+  # print("sum rewards: ", sum_rewards)
   return sum_rewards
 
 
@@ -325,8 +327,21 @@ if __name__ == "__main__":
 
 
   args = parser.parse_args()
+  walk = [0, PI, PI/2, 3*PI/2]
+  canter = [0, PI, 0, PI]
+  bound = [0, 0, PI, PI]
+  trot = [0, PI, PI , 0]
+  phase = 0
+  if(args.gait == "trot"):
+    phase = trot
+  elif(args.gait == "canter"):
+    phase = canter
+  elif(args.gait == "bound"):
+    phase = bound
+  elif(args.gait == "walk"):
+    phase = walk    
   # #Custom environments that you want to use ----------------------------------------------------------------------------------------
-  register(id='Stoch2-v0',entry_point='pybRL.envs.stoch2_gym_bullet_env_bezier:Stoch2Env', kwargs = {'gait' : args.gait, 'phase': [0, PI, PI, 0]} )
+  register(id='Stoch2-v0',entry_point='pybRL.envs.stoch2_gym_bullet_env_bezier:Stoch2Env', kwargs = {'gait' : args.gait, 'phase': phase} )
   register(id='Stoch2-v3',entry_point='pybRL.envs.stoch2_gym_bullet_env_bezier_stairs:Stoch2Env')
   register(id='Stoch2-v4',entry_point='pybRL.envs.stoch2_gym_bullet_env_bezier_stairs_kartik:Stoch2Env')
   register(id='Stoch2-v1',entry_point='pybRL.envs.stoch2_gym_bullet_env_normal:StochBulletEnv', 

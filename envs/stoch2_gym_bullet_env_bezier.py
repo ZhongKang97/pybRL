@@ -40,7 +40,7 @@ class Stoch2Env(gym.Env):
         self._theta = 0
         self._theta0 = 0
         self._update_action_every = 1.  # update is every 50% of the step i.e., theta goes from 0 to pi/2
-        self._frequency = 1. #change back to 1
+        self._frequency = 2.8 #change back to 1
         self._kp = 20
         self._kd = 2
         self.dt = 0.001
@@ -48,8 +48,8 @@ class Stoch2Env(gym.Env):
         self._n_steps = 0
         self._action_dim = 10
         # self._obs_dim = 7
-        self._obs_dim = 10
-        # self._obs_dim = 4
+        self._obs_dim = 8
+     
         self.action = np.zeros(self._action_dim)
         
         self._last_base_position = [0, 0, 0]
@@ -208,13 +208,16 @@ class Stoch2Env(gym.Env):
                 
             p_index = (p_index + 1)% int ( 0.05 / self.dt)
             
-            m_angle_cmd_ext = np.zeros(10)
-            m_angle_cmd_ext[[1,2,3,4,6,7,8,9]] = leg_m_angle_cmd
-            m_angle_cmd_ext[[0,5]] = spine_des
+            # m_angle_cmd_ext = np.zeros(10)
+            # m_angle_cmd_ext[[1,2,3,4,6,7,8,9]] = leg_m_angle_cmd
+            # m_angle_cmd_ext[[0,5]] = spine_des
 
-            m_vel_cmd_ext = np.zeros(10)
-            m_vel_cmd_ext[[1,2,3,4,6,7,8,9]] = leg_m_vel_cmd
-            m_vel_cmd_ext[[0,5]] = d_spine_des
+            # m_vel_cmd_ext = np.zeros(10)
+            # m_vel_cmd_ext[[1,2,3,4,6,7,8,9]] = leg_m_vel_cmd
+            # m_vel_cmd_ext[[0,5]] = d_spine_des
+
+            m_angle_cmd_ext = np.array(leg_m_angle_cmd)
+            m_vel_cmd_ext = np.zeros(8)
 
             for _ in range(n_frames):
                 current_angle_data = np.concatenate(([ii],self.GetMotorAngles()))
@@ -437,16 +440,14 @@ class Stoch2Env(gym.Env):
             joint_info = self._pybullet_client.getJointInfo(self.stoch2, i)
             joint_name_to_id[joint_info[1].decode("UTF-8")] = joint_info[0]
         
-        MOTOR_NAMES = [ "motor_front_body_spine_joint", 
-                        "motor_fl_upper_hip_joint",
+        MOTOR_NAMES = [ "motor_fl_upper_hip_joint",
                         "motor_fl_upper_knee_joint", 
                         "motor_fr_upper_hip_joint",
                         "motor_fr_upper_knee_joint", 
-                        "motor_back_body_spine_joint",
                         "motor_bl_upper_hip_joint",
                         "motor_bl_upper_knee_joint", 
                         "motor_br_upper_hip_joint", 
-                        "motor_br_upper_knee_joint",]
+                        "motor_br_upper_knee_joint"]
         
         #   WITHOUT SPINE
         # MOTOR_NAMES = [ "motor_fl_upper_hip_joint",
@@ -578,7 +579,8 @@ class Stoch2Env(gym.Env):
 if(__name__ == "__main__"):
     env = Stoch2Env(render=True)
     for i in range(10):
-        env.step(np.array([0,0,0,0,0,0,0,0,0,0]))
+        # env.step(np.array([0,0,0,0,0,0,0,0,0,0]))
+        env.step(np.ones(5))
 #         env.step(np.array( [ 0.06778296, -0.01940124, -0.01924977, -0.00751148, -0.03500922,  0.01891797,
 #  -0.02483966, -0.01901164, -0.01536581,  0.01925358]))
         #Normalize action space between -0.024 to +0.024

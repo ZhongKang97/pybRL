@@ -31,7 +31,7 @@ y  = np.zeros(size+1)
 n=10
 
 for k in range(1):
-	pts = 10*np.ones(n+1) + 4*np.random.rand(n+1)	
+	pts = 10*np.ones(n+1) 
 		#pts = 10*np.ones(n+1)
 	pts[n] = pts[0]  # C0 continuity	
 	print(pts)
