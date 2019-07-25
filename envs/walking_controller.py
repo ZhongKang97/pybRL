@@ -289,7 +289,7 @@ class WalkingController():
         # TO ensure only forward motion
         action = np.abs(action)
         # Only works if action size is 10, doesnt search the entire feasible space, see spline_space to understand
-        action = np.multiply_ref(action, multiply_ref)
+        action = np.multiply(action, mul_ref)
 
         #C0 continuity at the end
         action = np.append(action, action[0])
