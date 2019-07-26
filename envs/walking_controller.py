@@ -281,7 +281,11 @@ class WalkingController():
         #Spline reference action is a circle with 0.02 radius centered at 0, -0.17
         #Normalize action varying from -1 to 1 to -0.024 to 0.024
         # action = action * 0.024
-        mul_ref = np.array([0.08233419, 0.07341638, 0.04249794, 0.04249729, 0.07341638, 0.08183298,0.07368498, 0.04149645, 0.04159619, 0.07313576])
+        if(action.size == 10):
+            mul_ref = np.array([0.08233419, 0.07341638, 0.04249794, 0.04249729, 0.07341638, 0.08183298,0.07368498, 0.04149645, 0.04159619, 0.07313576])
+        elif(action.size == 18):
+            mul_ref = [0.08733419, 0.07801237, 0.07310331, 0.05280192, 0.04580373, 0.04580335, 0.05280085, 0.07310168, 0.07801237, 0.08683298, 0.11530908, 0.07157067, 0.05135627, 0.0447909,  0.04467491, 0.05151569, 0.0710504,  0.11530908]
+
         action = np.multiply(action, mul_ref) * 0.5
         action_spline_ref = np.multiply(np.ones(action.size),mul_ref) * 0.5
         action = action + action_spline_ref

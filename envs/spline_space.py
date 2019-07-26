@@ -46,7 +46,7 @@ def get_spline(action, center):
 
         coeffts = spline_fit(y0, y1, d0, d1)
         r = cubic_spline(coeffts, tau)
-        x.append(r * np.cos(theta)+ center[0])
+        x.append(-r * np.cos(theta)+ center[0])
         y.append(r * np.sin(theta) + center[1])
         theta = theta + 2*PI/1000
     return np.array(x), np.array(y)
@@ -85,18 +85,24 @@ x_top = np.arange(x_min[0], x_max[0], -0.001)
 final_x = np.concatenate([x_max, np.flip(x_bottom), x_min, x_top])
 final_y = np.concatenate([y, np.ones(x_bottom.size)*y[-1], y, np.ones(x_top.size)*y[0]])
 final_thetas = np.arctan2(final_y - center[1], final_x - center[0])
-final_radius = np.sqrt(np.square(final_x - center[0]) + np.square(final_y - center[1])) - 0.01
+final_radius = np.sqrt(np.square(final_x - center[0]) + np.square(final_y - center[1])) - 0.005
 check_x = np.multiply(final_radius, np.cos(final_thetas)) + center[0]
 check_y = np.multiply(final_radius, np.sin(final_thetas)) + center[1]
 np.save("stoch2/ik_check_thetas", final_thetas)
 np.save("stoch2/ik_check_radius", final_radius)
 
-action = np.ones(10)
+action = np.ones(30)
+# action = np.array([ 1.18621837,-1.24374914,-0.2546842,1.368942,1.30855425,-0.23257767,-0.76869941,-1.10599863,0.1056882,1.24348629])
+# action = np.clip(action, -1, 1)
+# mul_ref = np.array([0.08233419, 0.07341638, 0.04249794, 0.04249729, 0.07341638, 0.08183298,0.07368498, 0.04149645, 0.04159619, 0.07313576])
+# action = np.multiply(action, mul_ref) * 0.5
+# action_spline_ref = np.multiply(np.ones(action.size),mul_ref) * 0.5
+# action = action + action_spline_ref
 mul_ref, pts = _generate_spline_ref(action.size, final_radius, final_thetas)
-action = np.multiply(action, mul_ref) * 0.5
+action = np.multiply(action, mul_ref)
 print(mul_ref)
 action = np.append(action, action[0])
-print(action)
+# print(action)
 x_spline, y_spline = get_spline(action, center)
 
 # print(x_top)

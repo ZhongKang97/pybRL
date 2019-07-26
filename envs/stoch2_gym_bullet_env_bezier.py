@@ -28,7 +28,9 @@ class Stoch2Env(gym.Env):
                  render = False,
                  on_rack = False,
                  gait = 'trot',
-                 phase = [0,PI,PI,0]):
+                 phase = [0,PI,PI,0],
+                 action_dim = 10,
+                 stairs = False):
         
         self._is_render = render
         self._on_rack = on_rack
@@ -46,7 +48,8 @@ class Stoch2Env(gym.Env):
         self.dt = 0.001
         self._frame_skip = 5
         self._n_steps = 0
-        self._action_dim = 10
+        self._action_dim = action_dim
+
         # self._obs_dim = 7
         self._obs_dim = 8
      
@@ -118,8 +121,19 @@ class Stoch2Env(gym.Env):
                       -0.1836,-0.1832,-0.1827,-0.1823,-0.1818,-0.1814,-0.1809,-0.1805,-0.1800,-0.1796,
                       -0.1792,-0.1788,-0.1784,-0.1780,-0.1776,-0.1772,-0.1768,-0.1767,-0.1772,-0.1777,
                       -0.1782,-0.1787,-0.1793,-0.1812,-0.1831,-0.1850,-0.1869,-0.1888,-0.1911,-0.1936])
-        
         self.hard_reset()
+        if(stairs):
+            boxHalfLength = 0.06
+            boxHalfWidth = 2.5
+            boxHalfHeight = 0.02
+            sh_colBox = self._pybullet_client.createCollisionShape(self._pybullet_client.GEOM_BOX,halfExtents=[boxHalfLength,boxHalfWidth,boxHalfHeight])
+            boxOrigin = 0.25
+            n_steps = 30
+            for i in range(n_steps):
+                block=self._pybullet_client.createMultiBody(baseMass=0,baseCollisionShapeIndex = sh_colBox,basePosition = [boxOrigin + i*2*boxHalfLength,0,boxHalfHeight + i*2*boxHalfHeight],baseOrientation=[0.0,0.0,0.0,1])
+            x = 1
+            
+        
     def hard_reset(self):
         self._pybullet_client.resetSimulation()
         self._pybullet_client.setPhysicsEngineParameter(numSolverIterations=int(300))
@@ -579,10 +593,10 @@ class Stoch2Env(gym.Env):
 
 
 if(__name__ == "__main__"):
-    env = Stoch2Env(render=True)
-    for i in range(10):
+    env = Stoch2Env(render=True, stairs = True)
+    for i in range(20):
         # env.step(np.array([0,0,0,0,0,0,0,0,0,0]))
-        env.step(np.ones(5))
+        env.step(np.zeros(18))
 #         env.step(np.array( [ 0.06778296, -0.01940124, -0.01924977, -0.00751148, -0.03500922,  0.01891797,
 #  -0.02483966, -0.01901164, -0.01536581,  0.01925358]))
         #Normalize action space between -0.024 to +0.024
