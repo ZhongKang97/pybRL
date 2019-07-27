@@ -33,7 +33,7 @@ class HyperParameters():
     """
     This class is basically a struct that contains all the hyperparameters that you want to tune
     """
-    def __init__(self,forward_reward_cap = 1, normal = True,gait = 'trot' ,msg = '', nb_steps=10000, episode_length=1000, learning_rate=0.02, nb_directions=16, nb_best_directions=8, noise=0.03, seed=1, env_name='HalfCheetahBulletEnv-v0', energy_weight = 0.2):
+    def __init__(self,forward_reward_cap = 1,stairs = False, action_dim = 10 , normal = True,gait = 'trot' ,msg = '', nb_steps=10000, episode_length=1000, learning_rate=0.02, nb_directions=16, nb_best_directions=8, noise=0.03, seed=1, env_name='HalfCheetahBulletEnv-v0', energy_weight = 0.2):
         self.nb_steps = nb_steps
         self.episode_length = episode_length
         self.learning_rate = learning_rate
@@ -48,17 +48,23 @@ class HyperParameters():
         self.msg = msg
         self.forward_reward_cap = forward_reward_cap
         self.gait = gait
+        self.action_dim = action_dim
+        self.stairs = stairs
     def to_text(self, path):
         res_str = ''
         res_str = res_str + 'learning_rate: ' + str(self.learning_rate) + '\n'
         res_str = res_str + 'noise: ' + str(self.noise) + '\n'
-        res_str = res_str + 'env_name: ' + str(self.env_name) + '\n'
+        if(self.stairs):
+          res_str = res_str + 'env_name: ' + str(self.env_name) + 'with stairs \n'
+        else:
+          res_str = res_str + 'env_name: ' + str(self.env_name)
         res_str = res_str + 'episode_length: ' + str(self.episode_length) + '\n'
         res_str = res_str + 'energy weight: ' + str(self.energy_weight) + '\n'
         res_str = res_str + 'direction ratio: '+ str(self.nb_directions/ self.nb_best_directions) + '\n'
         res_str = res_str + 'Normal initialization: '+ str(self.normal) + '\n'
         res_str = res_str + 'Forward reward cap: '+ str(self.forward_reward_cap) + '\n'
         res_str = res_str + 'Gait: '+ str(self.gait) + '\n'
+        res_str = res_str + 'Spline polynomial degree: '+ str(self.action_dim) + '\n'
         res_str = res_str + self.msg + '\n'
         fileobj = open(path, 'w')
         fileobj.write(res_str)
@@ -325,13 +331,15 @@ if __name__ == "__main__":
   parser.add_argument('--msg', help='msg to save in a text file', type=str, default='')
   parser.add_argument('--forward_reward_cap', help='Forward reward cap used in training', type=float, default=10000)
   parser.add_argument('--distance_weight', help='The weight to be given to distance moved by robot', type=float, default=1.0)
-
+  parser.add_argument('--stairs', help='add stairs to the bezier environment', type=int, default=0)
+  parser.add_argument('--action_dim', help='degree of the spline polynomial used in the training', type=int, default=20)
 
   args = parser.parse_args()
   walk = [0, PI, PI/2, 3*PI/2]
   canter = [0, PI, 0, PI]
   bound = [0, 0, PI, PI]
   trot = [0, PI, PI , 0]
+  custom_phase = [0, PI, PI+0.1 , 0.1]
   phase = 0
   if(args.gait == "trot"):
     phase = trot
@@ -341,8 +349,10 @@ if __name__ == "__main__":
     phase = bound
   elif(args.gait == "walk"):
     phase = walk    
+  elif(args.gait == "custom_phase1"):
+    phase = custom_phase
   # #Custom environments that you want to use ----------------------------------------------------------------------------------------
-  register(id='Stoch2-v0',entry_point='pybRL.envs.stoch2_gym_bullet_env_bezier:Stoch2Env', kwargs = {'gait' : args.gait, 'phase': phase} )
+  register(id='Stoch2-v0',entry_point='pybRL.envs.stoch2_gym_bullet_env_bezier:Stoch2Env', kwargs = {'gait' : args.gait, 'phase': phase, 'action_dim': args.action_dim, 'stairs': args.stairs} )
   register(id='Stoch2-v3',entry_point='pybRL.envs.stoch2_gym_bullet_env_bezier_stairs:Stoch2Env')
   register(id='Stoch2-v4',entry_point='pybRL.envs.stoch2_gym_bullet_env_bezier_stairs_kartik:Stoch2Env')
   register(id='Stoch2-v1',entry_point='pybRL.envs.stoch2_gym_bullet_env_normal:StochBulletEnv', 
@@ -368,6 +378,8 @@ if __name__ == "__main__":
   hp.nb_best_directions = int(hp.nb_directions / 2)
   hp.normal = args.normal
   hp.gait = args.gait
+  hp.action_dim = args.action_dim
+  hp.stairs = args.stairs
   # print('number directions: ', hp.nb_directions)
   # print('number best directions: ', hp.nb_best_directions)
   # exit()

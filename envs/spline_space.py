@@ -91,7 +91,7 @@ check_y = np.multiply(final_radius, np.sin(final_thetas)) + center[1]
 np.save("stoch2/ik_check_thetas", final_thetas)
 np.save("stoch2/ik_check_radius", final_radius)
 
-action = np.ones(30)
+action = np.ones(100)
 # action = np.array([ 1.18621837,-1.24374914,-0.2546842,1.368942,1.30855425,-0.23257767,-0.76869941,-1.10599863,0.1056882,1.24348629])
 # action = np.clip(action, -1, 1)
 # mul_ref = np.array([0.08233419, 0.07341638, 0.04249794, 0.04249729, 0.07341638, 0.08183298,0.07368498, 0.04149645, 0.04159619, 0.07313576])

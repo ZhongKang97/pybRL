@@ -30,7 +30,9 @@ class Stoch2Env(gym.Env):
                  gait = 'trot',
                  phase = [0,PI,PI,0],
                  action_dim = 10,
-                 stairs = False):
+                 stairs = True):
+        
+        self._is_stairs = stairs
         
         self._is_render = render
         self._on_rack = on_rack
@@ -122,12 +124,12 @@ class Stoch2Env(gym.Env):
                       -0.1792,-0.1788,-0.1784,-0.1780,-0.1776,-0.1772,-0.1768,-0.1767,-0.1772,-0.1777,
                       -0.1782,-0.1787,-0.1793,-0.1812,-0.1831,-0.1850,-0.1869,-0.1888,-0.1911,-0.1936])
         self.hard_reset()
-        if(stairs):
+        if(self._is_stairs):
             boxHalfLength = 0.06
             boxHalfWidth = 2.5
             boxHalfHeight = 0.02
             sh_colBox = self._pybullet_client.createCollisionShape(self._pybullet_client.GEOM_BOX,halfExtents=[boxHalfLength,boxHalfWidth,boxHalfHeight])
-            boxOrigin = 0.25
+            boxOrigin = 0.15
             n_steps = 30
             for i in range(n_steps):
                 block=self._pybullet_client.createMultiBody(baseMass=0,baseCollisionShapeIndex = sh_colBox,basePosition = [boxOrigin + i*2*boxHalfLength,0,boxHalfHeight + i*2*boxHalfHeight],baseOrientation=[0.0,0.0,0.0,1])
@@ -319,8 +321,9 @@ class Stoch2Env(gym.Env):
         # distance_travelled = np.clip(forward_reward, -0.1, 0.1)
 
 #         walking_velocity_reward = 10 * np.exp(-10*(0.6 - xvel)**2)
-        # walking_height_reward = 0.5 * np.exp(-10*(0.23 - current_base_position[2])**2)
-#         print(current_base_position[2])
+        walking_height_reward = 0.5 * np.exp(-10*(0.23 - current_base_position[2])**2)
+        #print("Current base position" + str(current_base_position[2]))
+        #print("Walking height" + str(walking_height_reward))
 
         done, penalty = self._termination(current_base_position, current_base_orientation)
 #         if forward_reward >= 0:
@@ -357,7 +360,10 @@ class Stoch2Env(gym.Env):
         # reward = distance_travelled - penalty - 0.01 * energy_spent_per_step + 0.5 * costreference_reward #+ walking_height_reward + foot_clearance_reward + stride_length_reward# + walking_velocity_reward
         # print('reward being returned in function: ', reward)
         #REMOVED PENALTIES TO LEARN OTHER GAITS
-        reward = distance_travelled - 0.01 * energy_spent_per_step #+ walking_height_reward + foot_clearance_reward + stride_length_reward# + walking_velocity_reward
+        if self._is_stairs:
+            reward = distance_travelled - 0.01 * energy_spent_per_step + walking_height_reward #+ foot_clearance_reward + stride_length_reward# + walking_velocity_reward
+        else:
+            reward = distance_travelled - 0.01 * energy_spent_per_step #+ walking_height_reward + foot_clearance_reward + stride_length_reward# + walking_velocity_reward
         return reward, done, penalty
 
     def _apply_pd_control(self, motor_commands, motor_vel_commands):

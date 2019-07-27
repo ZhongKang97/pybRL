@@ -48,12 +48,14 @@ walk = [0, PI, PI/2, 3*PI/2]
 canter = [0, PI, 0, PI]
 bound = [0, 0, PI, PI]
 trot = [0, PI, PI , 0]
-env = e2.Stoch2Env(render = True, phase = walk)
+custom_phase = [0, PI, PI+0.1 , 0.1]
+
+env = e2.Stoch2Env(render = True, phase = custom_phase, stairs = True)
 # env = e4.Stoch2Env(render = True)
 # path = '/home/sashank/mjrl-master/pybRL/experiments/policy_MinitaurTrottingEnv-v0_20190522-110536.npy'
 # path = '/home/abhik/pybRL/experiments/Stoch2_ARS_1/iterations/best_policy.npy'
 #'/pybRL/experiments/Stoch2_Jun14_9/iterations/policy_10.npy'
-path = '/pybRL/experiments/spline/Jul25_1/iterations/best_policy.npy'
+path = '/pybRL/experiments/spline/Jul26_stairs/iterations/best_policy.npy'
 path = os.path.realpath('../..') + path
 state = env.reset()
 nb_inputs = env.observation_space.sample().shape[0]
@@ -68,9 +70,11 @@ total_reward = 0
 states = []
 # action = np.array([ 0.24504616, -0.11582746,  0.71558934, -0.46091432, -0.36284493,  0.00495828,
 #  -0.06466855, -0.45247894,  0.72117291, -0.11068088])
-while i<10:
-    action = np.clip(policy.dot(state), -1, 1)
-    action = np.zeros(10)
+while i<20:
+    action = policy.dot(state)
+    # action = np.ones(18)
+    action = np.clip(action, -1, 1)
+    print(action)
     state, reward, done, info = env.step(action)
     states.append(state)
     # env.step(env.action_space.sample())
