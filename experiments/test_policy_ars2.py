@@ -70,7 +70,7 @@ total_reward = 0
 states = []
 # action = np.array([ 0.24504616, -0.11582746,  0.71558934, -0.46091432, -0.36284493,  0.00495828,
 #  -0.06466855, -0.45247894,  0.72117291, -0.11068088])
-while i<20:
+while i<1000:
     action = policy.dot(state)
     # action = np.ones(18)
     action = np.clip(action, -1, 1)
