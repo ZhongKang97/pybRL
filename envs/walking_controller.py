@@ -296,8 +296,13 @@ class WalkingController():
 
         #C0 continuity at the end
         action = np.append(action, action[0])
-        n = action.size -1
 
+        final_str = '{'
+        for x in action:
+            final_str = final_str + str(round(x,4)) + ','
+        final_str = final_str + '};'
+        print(final_str)
+        n = action.size -1
         front_right = leg_data()
         front_left = leg_data()
         back_right = leg_data()

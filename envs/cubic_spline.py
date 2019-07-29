@@ -28,16 +28,23 @@ y  = np.zeros(size+1)
 
 
 # Number of segments
-n=10
+n=18
 
 for k in range(1):
-	pts = 10*np.ones(n+1) 
+	# pts = 10*np.ones(n+1) 
+
 		#pts = 10*np.ones(n+1)
-	pts[n] = pts[0]  # C0 continuity	
-	print(pts)
+	# pts[n] = pts[0]  # C0 continuity	
+	pts1 = np.array([0.0307,0.0038,0.0169,0.0236,0.0119,0.0,0.0528,0.0731,0.078,0.0443,0.0133,0.0,0.0,0.0,0.0018,0.0515,0.0711,0.1153,0.0307])
+	pts2 = np.array([0.0409,0.0134,0.0266,0.0234,0.0185,0.0117,0.0528,0.0731,0.078,0.0651,0.024,0.0057,0.0017,0.0,0.0,0.0335,0.0711,0.1153,0.0409])
+
 	theta = 0
 	i = 0
 	while(theta < 2*PI):
+			if(theta < PI):
+				pts = pts1
+			else:
+				pts= pts2
 			idx = int(theta*n/(2*PI))
 			tau = (theta - 2*PI*idx/n) /(2*PI/n)
 

@@ -16,7 +16,7 @@ def _generate_spline_ref(size, limit_radius, limit_thetas):
         if(theta > PI):
             theta = theta - 2*PI
         idx = np.abs(theta - limit_thetas).argmin()
-        print('diff: ', np.abs(theta - limit_thetas).min())
+        # print('diff: ', np.abs(theta - limit_thetas).min())
         spline_ref[i] = limit_radius[idx]
         x.append(limit_radius[idx]*np.cos(theta))
         y.append(limit_radius[idx]*np.sin(theta))
@@ -28,8 +28,10 @@ def get_spline(action, center):
     theta = 0
     x= []
     y =[]
+    r1= []
     n = action.size -1
     while(theta < 2*PI):
+
         idx = int((theta - 1e-4)*n/(2*PI))
         tau = (theta - 2*PI*idx/n) /(2*PI/n)
         y0 = action[idx]
@@ -46,10 +48,12 @@ def get_spline(action, center):
 
         coeffts = spline_fit(y0, y1, d0, d1)
         r = cubic_spline(coeffts, tau)
+        r1.append(r)
         x.append(-r * np.cos(theta)+ center[0])
         y.append(r * np.sin(theta) + center[1])
         theta = theta + 2*PI/1000
-    return np.array(x), np.array(y)
+    
+    return np.array(x), np.array(y), np.array(r1)
 
 y = np.arange(-0.145, -0.245, -0.001)
 
@@ -100,13 +104,26 @@ action = np.ones(100)
 # action = action + action_spline_ref
 mul_ref, pts = _generate_spline_ref(action.size, final_radius, final_thetas)
 action = np.multiply(action, mul_ref)
-print(mul_ref)
+# print(mul_ref)
 action = np.append(action, action[0])
 # print(action)
-x_spline, y_spline = get_spline(action, center)
+
+action = np.array([0.0409,0.0134,0.0266,0.0234,0.0185,0.0117,0.0528,0.0731,0.078,0.0651,0.024,0.0057,0.0017,0.0,0.0,0.0335,0.0711,0.1153,0.0409]) * 0.85
+# action = np.array([0.0466,0.0347,0.0357,0.0251,0.0252,0.0253,0.033,0.0552,0.0601,0.0539,0.02,0.012,0.0138,0.015,0.019,0.0293,0.0706,0.1153,0.0466])
+action = np.array([0.048,0.0391,0.035,0.025,0.0238,0.0242,0.0326,0.0522,0.0561,0.0525,0.0252,0.0113,0.0154,0.0159,0.0187,0.0275,0.0624,0.1153,0.048])
+action = np.array([0.0476,0.0372,0.0367,0.0254,0.0234,0.0238,0.0308,0.0485,0.0518,0.0514,0.0261,0.0166,0.0164,0.0182,0.0189,0.0269,0.0546,0.1153,0.0476])
+action = np.array([0.0469,0.038,0.035,0.0251,0.0237,0.0231,0.0311,0.0453,0.0472,0.0471,0.0329,0.0195,0.0194,0.0193,0.0202,0.027,0.0477,0.1113,0.0469])
+action = np.array([0.0463,0.0368,0.0343,0.026,0.0238,0.0238,0.0305,0.0429,0.0457,0.0458,0.0344,0.0218,0.0218,0.0202,0.0211,0.027,0.0456,0.0965,0.0463])
+action = np.array([0.0461,0.0367,0.0358,0.027,0.0237,0.0236,0.0292,0.0403,0.0429,0.0446,0.037,0.0257,0.0235,0.0217,0.0214,0.0267,0.042,0.0853,0.0461])
+final_str = '{'
+for x in action:
+    final_str = final_str + str(round(x,4)) + ','
+final_str = final_str + '};'
+print(final_str)
+x_spline, y_spline, r_spline = get_spline(action, center)
 
 # print(x_top)
-plt.figure()
+plt.figure(1)
 
 plt.plot(final_x,final_y,'r', label = 'robot workspace')
 plt.plot(x_circ, y_circ, 'g', label = 'circle search space')
@@ -114,6 +131,16 @@ plt.plot(x_circ, y_circ, 'g', label = 'circle search space')
 plt.plot(x_spline, y_spline,'y', label = 'spline search space')
 plt.plot(np.array(pts[0])+center[0], np.array(pts[1])+center[1], 'purple', label ='spline interpol pts')
 plt.legend()
+# plt.figure(2)
+# dict1 = {}
+# for i in range(final_thetas.size):
+#     dict1[final_thetas[i]] = final_radius[i]
+# th = []
+# r = []
+# for i in sorted(dict1):
+#     th.append(i)
+#     r.append(dict1[i])
+# plt.plot(th, r)
 plt.show()
 
 

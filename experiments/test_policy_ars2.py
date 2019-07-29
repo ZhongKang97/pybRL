@@ -45,17 +45,17 @@ class Normalizer():
 # env = e.MinitaurTrottingEnv(render=True)
 # env = e.StochBulletEnv(render = True, gait = 'trot', energy_weight= 0.000 )
 walk = [0, PI, PI/2, 3*PI/2]
-canter = [0, PI, 0, PI]
+pace = [0, PI, 0, PI]
 bound = [0, 0, PI, PI]
 trot = [0, PI, PI , 0]
 custom_phase = [0, PI, PI+0.1 , 0.1]
 
-env = e2.Stoch2Env(render = True, phase = custom_phase, stairs = True)
+env = e2.Stoch2Env(render = True, phase = trot, stairs = False)
 # env = e4.Stoch2Env(render = True)
 # path = '/home/sashank/mjrl-master/pybRL/experiments/policy_MinitaurTrottingEnv-v0_20190522-110536.npy'
 # path = '/home/abhik/pybRL/experiments/Stoch2_ARS_1/iterations/best_policy.npy'
 #'/pybRL/experiments/Stoch2_Jun14_9/iterations/policy_10.npy'
-path = '/pybRL/experiments/spline/Jul26_stairs/iterations/best_policy.npy'
+path = '/pybRL/experiments/spline/Jul25_4/iterations/policy_15.npy'
 path = os.path.realpath('../..') + path
 state = env.reset()
 nb_inputs = env.observation_space.sample().shape[0]
