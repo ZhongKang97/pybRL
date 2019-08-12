@@ -9,19 +9,24 @@ import math
 
 df = pd.DataFrame(columns = ['index','flh', 'flk', 'frh', 'frk','blh', 'blk', 'brh', 'brk'])
 
-def clean_data(info, state, no_of_pts):
+def clean_data(info, state, no_of_pts,start):
   no_of_rows = len(info) 
   x = [int(np.around(x)) for x in np.linspace(0, no_of_rows-1, no_of_pts-1)]
   final_info = []
   counter = 0
   for count in x:
-    temp_dict = {'index': counter ,'flh':info[count][1] ,'flk': info[count][2], 'frh': info[count][3], 
+    temp_dict = {'index': counter+start ,'flh':info[count][1] ,'flk': info[count][2], 'frh': info[count][3], 
     'frk': info[count][4],'blh': info[count][5], 'blk': info[count][6], 'brh': info[count][7], 'brk' : info[count][8]}
     final_info.append(temp_dict)
     counter= counter+1
-  final_info.append({'index': counter ,'flh':state[0] ,'flk':state[1], 'frh':state[2],'frk':state[3],'blh':state[4], 'blk':state[5], 'brh':state[6], 'brk' :state[7]})
-  return final_info
-
+  final_info.append({'index': counter+start ,'flh':state[0] ,'flk':state[1], 'frh':state[2],'frk':state[3],'blh':state[4], 'blk':state[5], 'brh':state[6], 'brk' :state[7]})
+  if start == 50:
+    return final_info, 0
+  elif start == 0:
+    return final_info, 50
+  else:
+    print("invalid start value")
+    exit()
 PI = math.pi
 walk = [0, PI, PI/2, 3*PI/2]
 pace = [0, PI, 0, PI]
@@ -35,16 +40,16 @@ action = np.array([0.4143, 0.2379, 0.0385, 0.0826, 0.0119, 0.0402, 0.031, 0.063,
 i = 0
 infos = []
 
-desired_pt_count = 300
-
+desired_pt_count = 50
+start = 0
 while i<5:
     state, reward, done, info = env.step(action)
-    print(state)
     if(i >=3):
-      info = clean_data(info,state,desired_pt_count)
+      info, start = clean_data(info,state,desired_pt_count,start)
       df = pd.concat([df, pd.DataFrame(info)])
     i =i+1
     pass
 print(df)
+df.to_csv("AUG12/trot_sim_data.csv", index=False)
 # final_info = clean_data(final_info)
 # np.savetxt("sim_action1_test.txt", final_info)
