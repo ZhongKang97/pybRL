@@ -293,7 +293,9 @@ class WalkingController():
         action_spline_ref = np.multiply(np.ones(action.size),mul_ref) * 0.5
         action = action + action_spline_ref
         
-
+        #TODO REMOVE LATER
+        action = action*0.9
+        
         #C0 continuity at the end
         action = np.append(action, action[0])
 
@@ -301,7 +303,7 @@ class WalkingController():
         for x in action:
             final_str = final_str + str(round(x,4)) + ','
         final_str = final_str + '};'
-        print(final_str)
+        # print(final_str)
         n = action.size -1
         front_right = leg_data()
         front_left = leg_data()

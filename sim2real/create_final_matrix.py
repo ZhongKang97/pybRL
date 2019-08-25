@@ -1,34 +1,36 @@
 import numpy as np  
-ARS = np.load("ARS_matrix.npy")
-A = np.load("A_matrix.npy")
-B = np.load("B_matrix.npy")
+ARS = np.load("AUG12/policy_4.npy")
+A = np.load("AUG12/A_matrix.npy")
+B = np.load("AUG12/B_matrix.npy")
 finalA = ARS@A
 finalB = ARS@B
-np.savetxt("finalA.csv", finalA, delimiter=',')
-np.save("finalA.npy", finalA)
-np.savetxt("finalB.csv", finalB, delimiter = ',')
-np.save("finalB.npy", finalB)
+print(finalA.shape)
+print(finalB.shape)
+np.savetxt("AUG12/finalA.csv", finalA, delimiter=',')
+np.save("AUG12/finalA.npy", finalA)
+np.savetxt("AUG12/finalB.csv", finalB, delimiter = ',')
+np.save("AUG12/finalB.npy", finalB)
 
-printstr = 'int ARS_matrixA[10][10] = \n'
+printstr = 'int ARS_matrixA[18][8] = \n'
 printstr = printstr + '{\n'
-for i in range(10):
+for i in range(18):
     printstr = printstr + '{'
-    for j in range(10):
+    for j in range(8):
         printstr = printstr + str(int(finalA[i][j]*(10**6)))
-        if j != 9:
+        if j != 7:
             printstr = printstr +','
     printstr = printstr +'}'
-    if i != 9:
+    if i != 17:
         printstr = printstr+',\n'
 printstr =printstr +'\n};\n'
 
-printstr = printstr + 'int ARS_matrixB[10] = {'
-for i in range(10):
+printstr = printstr + 'int ARS_matrixB[18] = {'
+for i in range(18):
     printstr = printstr + str(int(finalB[i]*(10**6)))
-    if i != 9:
+    if i != 17:
         printstr = printstr + ','
 printstr = printstr + '};'
 
-fobj = open("final.txt", 'w')
+fobj = open("AUG12/final.txt", 'w')
 fobj.write(printstr)
 fobj.close()
